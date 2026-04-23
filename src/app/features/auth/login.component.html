@@ -1,0 +1,103 @@
+<div class="min-h-screen flex items-center justify-center px-4" style="background-color: #100839">
+  <!-- Card login -->
+  <div class="w-full max-w-md">
+    <!-- Logo / En-tête -->
+    <div class="text-center mb-8">
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
+        style="background-color: #25176e"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-8 h-8 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V11"
+          />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold text-white tracking-tight">LOCMNS</h1>
+      <p class="text-sm mt-1" style="color: #9ca3af">Gestion de matériel</p>
+    </div>
+
+    <!-- Formulaire -->
+    <div class="rounded-2xl p-8" style="background-color: #1a0f4a">
+      <h2 class="text-xl font-semibold text-white mb-6">Connexion</h2>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2" style="color: #9ca3af">
+            Adresse email
+          </label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="vous@locmns.fr"
+            class="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none transition-all"
+            style="background-color: #100839; border: 1px solid #2d1b6b"
+            [class.border-red-500]="emailInvalid"
+          />
+          @if (emailInvalid) {
+            <p class="text-red-400 text-xs mt-1">Email invalide.</p>
+          }
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium mb-2" style="color: #9ca3af">
+            Mot de passe
+          </label>
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            class="w-full px-4 py-3 rounded-xl text-white placeholder-gray-500 outline-none transition-all"
+            style="background-color: #100839; border: 1px solid #2d1b6b"
+            [class.border-red-500]="passwordInvalid"
+          />
+          @if (passwordInvalid) {
+            <p class="text-red-400 text-xs mt-1">Mot de passe requis.</p>
+          }
+        </div>
+
+        <!-- Message d'erreur global -->
+        @if (errorMessage()) {
+          <div
+            class="mb-4 px-4 py-3 rounded-xl text-sm text-red-300"
+            style="
+              background-color: rgba(239, 68, 68, 0.1);
+              border: 1px solid rgba(239, 68, 68, 0.3);
+            "
+          >
+            {{ errorMessage() }}
+          </div>
+        }
+
+        <!-- Bouton submit -->
+        <button
+          type="submit"
+          [disabled]="loading()"
+          class="w-full py-3 rounded-xl font-semibold text-sm transition-all"
+          style="background-color: #ff5d2d; color: #7a2000"
+          [style.opacity]="loading() ? '0.7' : '1'"
+        >
+          @if (loading()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          } @else {
+            Se connecter
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-xs mt-6" style="color: #6b7280">Projet fil rouge — MNS 2026</p>
+  </div>
+</div>
