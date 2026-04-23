@@ -9,7 +9,9 @@ export interface User {
 }
 
 export interface AuthResponse {
-  access_token: string;
+  token: string;
+  email: string;
+  role: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -26,19 +28,21 @@ export class AuthService {
   readonly isGestionnaire = computed(() => this._user()?.role === 'GESTIONNAIRE');
   readonly isEmprunteur = computed(() => this._user()?.role === 'EMPRUNTEUR');
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+  ) {}
 
   login(email: string, password: string) {
-    return this.http.post<AuthResponse>(`${this.API}/auth/login`, { email, password })
-      .pipe(
-        tap(response => {
-          localStorage.setItem('access_token', response.access_token);
-          this._token.set(response.access_token);
-          const user = this.decodeUser(response.access_token);
-          localStorage.setItem('user', JSON.stringify(user));
-          this._user.set(user);
-        })
-      );
+    return this.http.post<AuthResponse>(`${this.API}/auth/login`, { email, password }).pipe(
+      tap((response) => {
+        localStorage.setItem('access_token', response.token);
+        this._token.set(response.token);
+        const user = this.decodeUser(response.token);
+        localStorage.setItem('user', JSON.stringify(user));
+        this._user.set(user);
+      }),
+    );
   }
 
   logout(): void {
@@ -58,7 +62,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         email: payload.sub,
-        role: payload.role
+        role: payload.role,
       };
     } catch {
       return { email: '', role: 'EMPRUNTEUR' };

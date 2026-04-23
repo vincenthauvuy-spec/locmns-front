@@ -1,0 +1,59 @@
+<div class="space-y-6">
+
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">Matériels</h1>
+      <p class="text-sm mt-1 text-base-content/60">
+        {{ isGestionnaire() ? 'Tous les matériels' : 'Matériels disponibles' }}
+      </p>
+    </div>
+    @if (isGestionnaire()) {
+      <a routerLink="/materiels/gestion"
+         class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+         style="background-color: #25176E;">
+        + Gérer les matériels
+      </a>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center gap-2 text-base-content/60">
+      <span class="loading loading-spinner loading-sm"></span>
+      Chargement...
+    </div>
+  } @else if (materiels().length === 0) {
+    <div class="rounded-xl p-8 text-center bg-base-200">
+      <p class="text-base-content/60">Aucun matériel disponible.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      @for (materiel of materiels(); track materiel.id) {
+        <div class="rounded-2xl p-5 flex flex-col gap-3 border border-base-300 bg-base-100 transition-all hover:shadow-md">
+
+          <div class="flex items-start justify-between">
+            <div>
+              <h3 class="font-semibold text-base-content">{{ materiel.nom }}</h3>
+              <p class="text-xs mt-1 text-base-content/60">{{ materiel.categorie.nom }}</p>
+            </div>
+            <span class="badge text-xs" [class]="getStatutClass(materiel.statut)">
+              {{ getStatutLabel(materiel.statut) }}
+            </span>
+          </div>
+
+          @if (materiel.description) {
+            <p class="text-sm text-base-content/60">{{ materiel.description }}</p>
+          }
+
+          @if (!isGestionnaire() && materiel.estLouable) {
+            <a [routerLink]="['/emprunts']" [queryParams]="{ materielId: materiel.id }"
+               class="mt-auto w-full py-2 rounded-xl text-sm font-semibold text-center text-white transition-all hover:opacity-90"
+               style="background-color: #FF5D2D;">
+              Faire une demande
+            </a>
+          }
+        </div>
+      }
+    </div>
+  }
+
+</div>

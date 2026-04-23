@@ -1,27 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400&display=swap');
-
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: light, dark;
-}
+@plugin "daisyui";
 
 @layer base {
-  :root {
-    --color-primary: #25176E;
-    --color-primary-dark: #100839;
-    --color-accent: #FF5D2D;
-    --color-electric: #2139D1;
-    --color-violet: #592299;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
-    --font-code: 'JetBrains Mono', monospace;
+  [data-theme="light"] {
+    --color-base-100: #F8F9FA;
+    --color-base-200: #F0F0F5;
+    --color-base-300: #E5E7EB;
+    --color-base-content: #1F2937;
   }
 
-  html {
-    font-family: var(--font-body);
-    font-size: 16px;
-  }
-
-  body {
-    @apply bg-base-100 text-base-content;
+  [data-theme="dark"] {
+    --color-base-100: #1a0f4a;
+    --color-base-200: #100839;
+    --color-base-300: #25176E;
+    --color-base-content: #FFFFFF;
   }
 }
