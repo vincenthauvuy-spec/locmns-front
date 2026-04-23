@@ -1,0 +1,132 @@
+<div class="space-y-8">
+
+  <!-- Header -->
+  <div>
+    <h1 class="text-2xl font-bold" style="color: #1F2937;">
+      Bonjour, {{ user()?.email }} 👋
+    </h1>
+    <p class="text-sm mt-1" style="color: #6B7280;">
+      {{ isGestionnaire() ? 'Espace gestionnaire' : 'Espace emprunteur' }}
+    </p>
+  </div>
+
+  <!-- Raccourcis -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+
+    @if (!isGestionnaire()) {
+      <a routerLink="/materiels"
+         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
+         style="background-color: #25176E;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+             style="background-color: rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9l-6-6z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-semibold">Matériels disponibles</p>
+          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Faire une demande</p>
+        </div>
+      </a>
+
+      <a routerLink="/emprunts"
+         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
+         style="background-color: #592299;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+             style="background-color: rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-semibold">Mes emprunts</p>
+          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Historique et en cours</p>
+        </div>
+      </a>
+    }
+
+    @if (isGestionnaire()) {
+      <a routerLink="/emprunts/validation"
+         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
+         style="background-color: #25176E;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+             style="background-color: rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-semibold">Demandes en attente</p>
+          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Valider ou refuser</p>
+        </div>
+      </a>
+
+      <a routerLink="/materiels/gestion"
+         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
+         style="background-color: #592299;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+             style="background-color: rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-semibold">Gestion matériels</p>
+          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Ajouter, modifier, supprimer</p>
+        </div>
+      </a>
+
+      <a routerLink="/incidents"
+         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
+         style="background-color: #2139D1;">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
+             style="background-color: rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="text-white font-semibold">Incidents</p>
+          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Consulter les signalements</p>
+        </div>
+      </a>
+    }
+  </div>
+
+  <!-- Notifications -->
+  <div>
+    <h2 class="text-lg font-semibold mb-4" style="color: #1F2937;">Notifications</h2>
+
+    @if (loading()) {
+      <div class="flex items-center gap-2" style="color: #6B7280;">
+        <span class="loading loading-spinner loading-sm"></span>
+        Chargement...
+      </div>
+    } @else if (notifications().length === 0) {
+      <div class="rounded-xl p-4 text-sm" style="background-color: #F3F4F6; color: #6B7280;">
+        Aucune notification pour le moment.
+      </div>
+    } @else {
+      <div class="space-y-3">
+        @for (notif of notifications(); track $index) {
+          <div class="rounded-xl p-4 text-sm" [class]="getNotifClass(notif.type)">
+            <span class="mr-2">{{ getNotifIcon(notif.type) }}</span>
+            {{ notif.message }}
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+</div>
