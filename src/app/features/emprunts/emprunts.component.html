@@ -1,0 +1,168 @@
+<div class="space-y-6">
+
+  <!-- En-tête -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        {{ isGestionnaire() ? 'Tous les emprunts' : 'Mes emprunts' }}
+      </h1>
+      <p class="text-sm mt-1 text-base-content/60">
+        {{ emprunts().length }} emprunt{{ emprunts().length > 1 ? 's' : '' }} au total
+      </p>
+    </div>
+    @if (!isGestionnaire()) {
+      <button (click)="showForm.set(!showForm())"
+              class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+              style="background-color: #25176E;">
+        {{ showForm() ? 'Annuler' : '+ Nouvelle demande' }}
+      </button>
+    }
+  </div>
+
+  <!-- Message succès -->
+  @if (successMessage()) {
+    <div class="rounded-xl p-4 text-sm border-l-4 border-green-400 bg-green-50 text-green-800">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <!-- Message erreur -->
+  @if (errorMessage()) {
+    <div class="rounded-xl p-4 text-sm border-l-4 border-red-400 bg-red-50 text-red-800">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <!-- Formulaire nouvelle demande -->
+  @if (showForm()) {
+    <div class="rounded-2xl p-6 border border-base-300 bg-base-100">
+      <h2 class="text-lg font-semibold text-base-content mb-4">Nouvelle demande d'emprunt</h2>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
+
+        <div>
+          <label class="block text-sm font-medium text-base-content/60 mb-1">Matériel</label>
+          <select formControlName="idMateriel"
+                  class="w-full px-4 py-3 rounded-xl bg-base-200 text-base-content border border-base-300 outline-none">
+            <option value="">Sélectionner un matériel</option>
+            @for (m of materiels(); track m.id) {
+              <option [value]="m.id">{{ m.nom }} — {{ m.categorie }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-base-content/60 mb-1">Date de début</label>
+            <input type="date" formControlName="dateDebut"
+                   class="w-full px-4 py-3 rounded-xl bg-base-200 text-base-content border border-base-300 outline-none"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-base-content/60 mb-1">Date de fin prévue</label>
+            <input type="date" formControlName="dateFinPrevue"
+                   class="w-full px-4 py-3 rounded-xl bg-base-200 text-base-content border border-base-300 outline-none"/>
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="submitting() || form.invalid"
+                class="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                style="background-color: #FF5D2D;"
+                [style.opacity]="submitting() || form.invalid ? '0.6' : '1'">
+          @if (submitting()) {
+            <span class="loading loading-spinner loading-sm"></span>
+          } @else {
+            Envoyer la demande
+          }
+        </button>
+      </form>
+    </div>
+  }
+
+  <!-- Filtres -->
+  @if (!loading() && emprunts().length > 0) {
+    <div class="flex gap-2 flex-wrap">
+      @for (f of filtres; track f.key) {
+        <button (click)="setFiltre(f.key)"
+                class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+                [style.background]="filtreActif() === f.key ? '#25176E' : 'transparent'"
+                [style.color]="filtreActif() === f.key ? 'white' : ''"
+                [class.border-base-300]="filtreActif() !== f.key"
+                [class.text-base-content]="filtreActif() !== f.key"
+                [class.border-transparent]="filtreActif() === f.key">
+          {{ f.label }}
+          <span class="ml-1 opacity-70">({{ compterParStatut(f.key) }})</span>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- Chargement -->
+  @if (loading()) {
+    <div class="flex items-center gap-2 text-base-content/60">
+      <span class="loading loading-spinner loading-sm"></span>
+      Chargement...
+    </div>
+
+  <!-- Liste vide -->
+  } @else if (empruntsFiltres.length === 0) {
+    <div class="rounded-xl p-8 text-center bg-base-200">
+      <p class="text-base-content/60 font-medium">Aucun emprunt dans cette catégorie.</p>
+      @if (!isGestionnaire()) {
+        <p class="text-xs text-base-content/40 mt-1">Cliquez sur "+ Nouvelle demande" pour emprunter un matériel.</p>
+      }
+    </div>
+
+  <!-- Liste des emprunts -->
+  } @else {
+    <div class="space-y-3">
+      @for (emprunt of empruntsFiltres; track emprunt.idEmprunt) {
+        <div class="rounded-2xl p-5 border border-base-300 bg-base-100 transition-all hover:border-base-content/20"
+             [style.opacity]="emprunt.statut === 'RENDU' || emprunt.statut === 'REFUSE' ? '0.65' : '1'">
+
+          <div class="flex items-center justify-between gap-4">
+            <!-- Infos matériel -->
+            <div class="flex-1 space-y-1">
+              <p class="font-semibold text-base-content">{{ emprunt.materiel }}</p>
+              
+              @if (isGestionnaire()) {
+                <p class="text-xs text-base-content/60">{{ emprunt.emprunteur }}</p>
+              }
+              <p class="text-xs text-base-content/50">
+                Du {{ emprunt.dateDebut | date:'dd/MM/yyyy' }}
+                au {{ emprunt.dateFinPrevue | date:'dd/MM/yyyy' }}
+                @if (emprunt.dateFinReelle) {
+                  · Rendu le {{ emprunt.dateFinReelle | date:'dd/MM/yyyy' }}
+                }
+              </p>
+            </div>
+
+            <!-- Statut + action -->
+            <div class="flex flex-col items-end gap-2">
+              <!-- Badge statut custom -->
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                    [class]="getStatutClass(emprunt.statut)">
+                <span class="w-1.5 h-1.5 rounded-full"
+                      [style.background]="getStatutDot(emprunt.statut)"></span>
+                {{ getStatutLabel(emprunt.statut) }}
+              </span>
+
+              <!-- Bouton annuler (EN_ATTENTE uniquement, emprunteur uniquement) -->
+              @if (!isGestionnaire() && peutAnnuler(emprunt)) {
+                <button (click)="annuler(emprunt.idEmprunt)"
+                        [disabled]="annulationEnCours() === emprunt.idEmprunt"
+                        class="text-xs px-3 py-1 rounded-lg border transition-all"
+                        style="color: #EF4444; border-color: #FECACA; background: #FEF2F2;">
+                  @if (annulationEnCours() === emprunt.idEmprunt) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    Annuler
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
