@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 
 export interface Emprunt {
   idEmprunt: number;
+  idMateriel: number;      // ← ajout
   dateDebut: string;
   dateFinPrevue: string;
   dateFinReelle?: string;
   statut: 'EN_ATTENTE' | 'REFUSE' | 'EN_COURS' | 'EN_RETARD' | 'RENDU';
-  materiel: { id: number; nom: string; categorie: { nom: string } };
-  emprunteur: { email: string };
+  materiel: string;
+  emprunteur: string;
 }
 
 export interface DemandeEmprunt {

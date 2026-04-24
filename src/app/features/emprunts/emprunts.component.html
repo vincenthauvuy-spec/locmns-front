@@ -44,8 +44,8 @@
           <select formControlName="idMateriel"
                   class="w-full px-4 py-3 rounded-xl bg-base-200 text-base-content border border-base-300 outline-none">
             <option value="">Sélectionner un matériel</option>
-            @for (m of materiels(); track m.id) {
-              <option [value]="m.id">{{ m.nom }} — {{ m.categorie }}</option>
+            @for (m of materiels(); track m.idMateriel) {
+              <option [value]="m.idMateriel">{{ m.nom }} — {{ m.categorie }}</option>
             }
           </select>
         </div>

@@ -62,7 +62,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         email: payload.sub,
-        role: payload.role,
+        role: payload.role?.replace('ROLE_', '') as 'GESTIONNAIRE' | 'EMPRUNTEUR',
       };
     } catch {
       return { email: '', role: 'EMPRUNTEUR' };

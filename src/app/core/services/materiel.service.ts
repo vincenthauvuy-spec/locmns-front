@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 export interface Materiel {
-  id: number;
+  idMateriel: number;
   nom: string;
   description: string;
   estLouable: boolean;

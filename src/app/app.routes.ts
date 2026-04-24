@@ -47,7 +47,6 @@ export const routes: Routes = [
       },
       {
         path: 'incidents',
-        canActivate: [roleGuard('GESTIONNAIRE')],
         loadComponent: () =>
           import('./features/incidents/incidents.component').then((m) => m.IncidentsComponent),
       },

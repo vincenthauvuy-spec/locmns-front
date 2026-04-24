@@ -27,7 +27,7 @@
     </div>
   } @else {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      @for (materiel of materiels(); track materiel.id) {
+      @for (materiel of materiels(); track materiel.idMateriel) {
         <div class="rounded-2xl p-5 flex flex-col gap-3 border border-base-300 bg-base-100 transition-all hover:shadow-md">
 
           <div class="flex items-start justify-between">
@@ -45,7 +45,7 @@
           }
 
           @if (!isGestionnaire() && materiel.estLouable) {
-            <a [routerLink]="['/emprunts']" [queryParams]="{ materielId: materiel.id }"
+            <a [routerLink]="['/emprunts']" [queryParams]="{ materielId: materiel.idMateriel }"
                class="mt-auto w-full py-2 rounded-xl text-sm font-semibold text-center text-white transition-all hover:opacity-90"
                style="background-color: #FF5D2D;">
               Faire une demande
