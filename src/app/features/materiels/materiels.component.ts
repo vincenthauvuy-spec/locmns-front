@@ -8,7 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
   selector: 'app-materiels',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './materiels.component.html'
+  templateUrl: './materiels.component.html',
 })
 export class MaterielsComponent implements OnInit {
   private materielService = inject(MaterielService);
@@ -28,27 +28,22 @@ export class MaterielsComponent implements OnInit {
         this.materiels.set(data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false)
+      error: () => this.loading.set(false),
     });
   }
 
-  getStatutClass(statut: string): string {
-    switch (statut) {
-      case 'DISPONIBLE': return 'badge-success';
-      case 'LOUE': return 'badge-warning';
-      case 'EN_REPARATION': return 'badge-info';
-      case 'HORS_SERVICE': return 'badge-error';
-      default: return 'badge-ghost';
-    }
-  }
-
-  getStatutLabel(statut: string): string {
-    switch (statut) {
-      case 'DISPONIBLE': return 'Disponible';
-      case 'LOUE': return 'En cours';
-      case 'EN_REPARATION': return 'En réparation';
-      case 'HORS_SERVICE': return 'Hors service';
-      default: return statut;
+  getStatutClass(etat: string): string {
+    switch (etat) {
+      case 'Disponible':
+        return 'badge-success';
+      case 'En cours':
+        return 'badge-info';
+      case 'En réparation':
+        return 'badge-warning';
+      case 'Hors service':
+        return 'badge-error';
+      default:
+        return 'badge-ghost';
     }
   }
 }

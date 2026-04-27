@@ -28,7 +28,7 @@ export const routes: Routes = [
         path: 'materiels/gestion',
         canActivate: [roleGuard('GESTIONNAIRE')],
         loadComponent: () =>
-          import('./features/materiels/gestion-materiels.component').then(
+          import('./features/materiels/gestion-materiels/gestion-materiels.component').then(
             (m) => m.GestionMaterielsComponent,
           ),
       },
