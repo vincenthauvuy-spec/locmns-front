@@ -1,0 +1,77 @@
+<div class="space-y-6">
+
+  <!-- En-tête -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">Validation des emprunts</h1>
+      <p class="text-sm mt-1 text-base-content/60">
+        {{ emprunts().length }} demande(s) en attente
+      </p>
+    </div>
+  </div>
+
+  <!-- Chargement -->
+  @if (loading()) {
+    <div class="flex items-center gap-2 text-base-content/60">
+      <span class="loading loading-spinner loading-sm"></span>
+      Chargement...
+    </div>
+  }
+
+  <!-- Aucune demande -->
+  @else if (emprunts().length === 0) {
+    <div class="rounded-xl p-8 text-center bg-base-200">
+      <p class="text-base-content/60">Aucune demande en attente.</p>
+    </div>
+  }
+
+  <!-- Liste des demandes -->
+  @else {
+    <div class="space-y-3">
+      @for (emprunt of emprunts(); track emprunt.idEmprunt) {
+        <div class="rounded-2xl p-5 border border-base-300 bg-base-100">
+          <div class="flex items-center justify-between gap-4">
+
+            <!-- Infos emprunt -->
+            <div class="space-y-1 flex-1">
+              <p class="font-semibold text-base-content">{{ emprunt.materiel }}</p>
+              <p class="text-sm text-base-content/60">
+                Demandé par <span class="font-medium">{{ emprunt.emprunteur }}</span>
+              </p>
+              <p class="text-xs text-base-content/50">
+                Du {{ emprunt.dateDebut | date:'dd/MM/yyyy' }}
+                au {{ emprunt.dateFinPrevue | date:'dd/MM/yyyy' }}
+              </p>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex items-center gap-2">
+              <button (click)="valider(emprunt.idEmprunt, false)"
+                      [disabled]="traitement() === emprunt.idEmprunt"
+                      class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                      style="background-color: #EF4444;">
+                @if (traitement() === emprunt.idEmprunt) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                } @else {
+                  Refuser
+                }
+              </button>
+              <button (click)="valider(emprunt.idEmprunt, true)"
+                      [disabled]="traitement() === emprunt.idEmprunt"
+                      class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+                      style="background-color: #22C55E;">
+                @if (traitement() === emprunt.idEmprunt) {
+                  <span class="loading loading-spinner loading-sm"></span>
+                } @else {
+                  Valider
+                }
+              </button>
+            </div>
+
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

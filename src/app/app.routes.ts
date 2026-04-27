@@ -41,7 +41,7 @@ export const routes: Routes = [
         path: 'emprunts/validation',
         canActivate: [roleGuard('GESTIONNAIRE')],
         loadComponent: () =>
-          import('./features/emprunts/validation-emprunts.component').then(
+          import('./features/emprunts/validation-emprunts/validation-emprunts.component').then(
             (m) => m.ValidationEmpruntsComponent,
           ),
       },
