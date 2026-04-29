@@ -6,6 +6,8 @@ import { tap } from 'rxjs/operators';
 export interface User {
   email: string;
   role: 'GESTIONNAIRE' | 'EMPRUNTEUR';
+  nom: string;
+  prenom: string;
 }
 
 export interface AuthResponse {
@@ -57,20 +59,29 @@ export class AuthService {
     return this._token();
   }
 
+  private loadUser(): User | null {
+  const stored = localStorage.getItem('user');
+  if (!stored) return null;
+  const parsed = JSON.parse(stored);
+  return {
+    email: parsed.email ?? '',
+    role: parsed.role ?? 'EMPRUNTEUR',
+    nom: parsed.nom ?? '',
+    prenom: parsed.prenom ?? '',
+  };
+}
+
   private decodeUser(token: string): User {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         email: payload.sub,
         role: payload.role?.replace('ROLE_', '') as 'GESTIONNAIRE' | 'EMPRUNTEUR',
+        nom: payload.nom ?? '',
+        prenom: payload.prenom ?? '',
       };
     } catch {
-      return { email: '', role: 'EMPRUNTEUR' };
+      return { email: '', role: 'EMPRUNTEUR', nom: '', prenom: '' };
     }
-  }
-
-  private loadUser(): User | null {
-    const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
   }
 }

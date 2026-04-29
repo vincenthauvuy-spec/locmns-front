@@ -2,131 +2,172 @@
 
   <!-- Header -->
   <div>
-    <h1 class="text-2xl font-bold" style="color: #1F2937;">
-      Bonjour, {{ user()?.email }} 👋
+    <h1 class="text-2xl font-bold text-base-content">
+      Bonjour{{ user()?.prenom ? ', ' + user()?.prenom : '' }} 👋
     </h1>
-    <p class="text-sm mt-1" style="color: #6B7280;">
+    <p class="text-sm mt-1 text-base-content/60">
       {{ isGestionnaire() ? 'Espace gestionnaire' : 'Espace emprunteur' }}
     </p>
   </div>
 
-  <!-- Raccourcis -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  @if (isGestionnaire()) {
 
-    @if (!isGestionnaire()) {
+    @if (loading()) {
+      <div class="flex items-center gap-2 text-base-content/60">
+        <span class="loading loading-spinner loading-sm"></span>
+        Chargement du tableau de bord...
+      </div>
+    } @else {
+
+      <!-- Stats cards -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="rounded-xl p-4 bg-base-200">
+          <p class="text-xs text-base-content/60 mb-1">Total matériels</p>
+          <p class="text-3xl font-semibold text-base-content">{{ stats().total }}</p>
+          <p class="text-xs text-base-content/40 mt-1">dans le parc</p>
+        </div>
+        <div class="rounded-xl p-4 bg-base-200">
+          <p class="text-xs text-base-content/60 mb-1">Disponibles</p>
+          <p class="text-3xl font-semibold" style="color: #22C55E;">{{ stats().disponibles }}</p>
+          <p class="text-xs text-base-content/40 mt-1">prêts à l'emprunt</p>
+        </div>
+        <div class="rounded-xl p-4 bg-base-200">
+          <p class="text-xs text-base-content/60 mb-1">En cours</p>
+          <p class="text-3xl font-semibold" style="color: #3B82F6;">{{ stats().enCours }}</p>
+          <p class="text-xs text-base-content/40 mt-1">emprunts actifs</p>
+        </div>
+        <div class="rounded-xl p-4 bg-base-200">
+          <p class="text-xs text-base-content/60 mb-1">En retard</p>
+          <p class="text-3xl font-semibold" style="color: #EF4444;">{{ stats().enRetard }}</p>
+          <p class="text-xs text-base-content/40 mt-1">à relancer</p>
+        </div>
+      </div>
+
+      <!-- Donut + Demandes en attente -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <!-- Donut chart -->
+        <div class="rounded-2xl p-5 border border-base-300 bg-base-100">
+          <p class="text-xs font-medium uppercase tracking-wide text-base-content/50 mb-4">Répartition du parc</p>
+          <div class="flex items-center gap-6">
+            <div style="position:relative;width:110px;height:110px;flex-shrink:0;">
+              <canvas id="parc-donut" width="110" height="110"></canvas>
+            </div>
+            <div class="flex flex-col gap-2 text-sm flex-1">
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#22C55E;"></span>
+                <span class="text-base-content/60 flex-1">Disponibles</span>
+                <span class="font-medium">{{ stats().disponibles }} <span class="text-base-content/40 text-xs">({{ pct(stats().disponibles) }})</span></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#3B82F6;"></span>
+                <span class="text-base-content/60 flex-1">En cours</span>
+                <span class="font-medium">{{ stats().enCours - stats().enRetard }} <span class="text-base-content/40 text-xs">({{ pct(stats().enCours - stats().enRetard) }})</span></span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:#EF4444;"></span>
+                <span class="text-base-content/60 flex-1">En retard</span>
+                <span class="font-medium">{{ stats().enRetard }} <span class="text-base-content/40 text-xs">({{ pct(stats().enRetard) }})</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Demandes en attente -->
+        <div class="rounded-2xl p-5 border border-base-300 bg-base-100">
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-xs font-medium uppercase tracking-wide text-base-content/50">Demandes en attente</p>
+            <a routerLink="/emprunts/validation" class="text-xs font-semibold" style="color:#2139D1;">Voir tout →</a>
+          </div>
+          @if (enAttente().length === 0) {
+            <p class="text-sm text-base-content/50">Aucune demande en attente.</p>
+          } @else {
+            <div class="flex flex-col gap-3">
+              @for (e of enAttente().slice(0, 3); track e.idEmprunt) {
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0"
+                       style="background:#EEEDFE;color:#534AB7;">
+                    {{ getInitiales(e.emprunteur) }}
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-base-content truncate">{{ e.materiel }}</p>
+                    <p class="text-xs text-base-content/50">{{ e.emprunteur }}</p>
+                  </div>
+                </div>
+              }
+              @if (enAttente().length > 3) {
+                <p class="text-xs text-base-content/40">+ {{ enAttente().length - 3 }} autre(s)</p>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Matériels en retard -->
+      <div class="rounded-2xl border border-base-300 bg-base-100">
+        <div class="flex items-center justify-between px-5 pt-5 pb-3">
+          <p class="text-xs font-medium uppercase tracking-wide text-base-content/50">Matériels en retard de retour</p>
+          <span class="text-xs text-base-content/40">trié par retard décroissant</span>
+        </div>
+        @if (enRetard().length === 0) {
+          <p class="px-5 pb-5 text-sm text-base-content/50">Aucun retard en cours.</p>
+        } @else {
+          <div class="divide-y divide-base-300">
+            @for (r of enRetard(); track r.idEmprunt) {
+              <div class="flex items-center gap-4 px-5 py-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium flex-shrink-0"
+                     style="background:#FCEBEB;color:#A32D2D;">
+                  {{ getInitiales(r.emprunteur) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-base-content truncate">{{ r.materiel }}</p>
+                  <p class="text-xs text-base-content/50">{{ r.emprunteur }} · prévu le {{ formatDate(r.dateFinPrevue) }}</p>
+                </div>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0"
+                      [style.background]="r.joursRetard >= 7 ? '#FCEBEB' : '#FAEEDA'"
+                      [style.color]="r.joursRetard >= 7 ? '#A32D2D' : '#854F0B'">
+                  J+{{ r.joursRetard }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    }
+
+  } @else {
+
+    <!-- Raccourcis emprunteur -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <a routerLink="/materiels"
          class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
          style="background-color: #25176E;">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
-             style="background-color: rgba(255,255,255,0.15);">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9l-6-6z"/>
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V9l-6-6z"/>
           </svg>
         </div>
         <div>
           <p class="text-white font-semibold">Matériels disponibles</p>
-          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Faire une demande</p>
+          <p class="text-xs" style="color:rgba(255,255,255,0.7);">Faire une demande</p>
         </div>
       </a>
-
       <a routerLink="/emprunts"
          class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
          style="background-color: #592299;">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
-             style="background-color: rgba(255,255,255,0.15);">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.15);">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
         <div>
           <p class="text-white font-semibold">Mes emprunts</p>
-          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Historique et en cours</p>
+          <p class="text-xs" style="color:rgba(255,255,255,0.7);">Historique et en cours</p>
         </div>
       </a>
-    }
+    </div>
 
-    @if (isGestionnaire()) {
-      <a routerLink="/emprunts/validation"
-         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
-         style="background-color: #25176E;">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
-             style="background-color: rgba(255,255,255,0.15);">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-white font-semibold">Demandes en attente</p>
-          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Valider ou refuser</p>
-        </div>
-      </a>
-
-      <a routerLink="/materiels/gestion"
-         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
-         style="background-color: #592299;">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
-             style="background-color: rgba(255,255,255,0.15);">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-white font-semibold">Gestion matériels</p>
-          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Ajouter, modifier, supprimer</p>
-        </div>
-      </a>
-
-      <a routerLink="/incidents"
-         class="rounded-2xl p-6 flex items-center gap-4 hover:scale-105 transition-transform cursor-pointer"
-         style="background-color: #2139D1;">
-        <div class="w-12 h-12 rounded-xl flex items-center justify-center"
-             style="background-color: rgba(255,255,255,0.15);">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
-               viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round"
-                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-          </svg>
-        </div>
-        <div>
-          <p class="text-white font-semibold">Incidents</p>
-          <p class="text-xs" style="color: rgba(255,255,255,0.7);">Consulter les signalements</p>
-        </div>
-      </a>
-    }
-  </div>
-
-  <!-- Notifications -->
-  <div>
-    <h2 class="text-lg font-semibold mb-4" style="color: #1F2937;">Notifications</h2>
-
-    @if (loading()) {
-      <div class="flex items-center gap-2" style="color: #6B7280;">
-        <span class="loading loading-spinner loading-sm"></span>
-        Chargement...
-      </div>
-    } @else if (notifications().length === 0) {
-      <div class="rounded-xl p-4 text-sm" style="background-color: #F3F4F6; color: #6B7280;">
-        Aucune notification pour le moment.
-      </div>
-    } @else {
-      <div class="space-y-3">
-        @for (notif of notifications(); track $index) {
-          <div class="rounded-xl p-4 text-sm" [class]="getNotifClass(notif.type)">
-            <span class="mr-2">{{ getNotifIcon(notif.type) }}</span>
-            {{ notif.message }}
-          </div>
-        }
-      </div>
-    }
-  </div>
+  }
 
 </div>
