@@ -54,7 +54,7 @@ export class IncidentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadIncidents();
-    
+
     this.form.get('idMateriel')?.valueChanges.subscribe((idMateriel) => {
       const id = Number(idMateriel);
       this.form.patchValue({ idEmprunt: null });
@@ -121,13 +121,13 @@ export class IncidentsComponent implements OnInit {
 
   getTypeIcon(type: string): string {
     switch (type) {
-      case 'PANNE':
+      case 'Panne':
         return '⚡';
-      case 'RETOUR_ANTICIPE':
+      case 'Retour anticipé':
         return '↩️';
-      case 'PROLONGATION':
+      case 'Prolongation':
         return '⏳';
-      case 'DYSFONCTIONNEMENT':
+      case 'Dysfonctionnement':
         return '🔧';
       default:
         return '⚠️';
@@ -135,17 +135,6 @@ export class IncidentsComponent implements OnInit {
   }
 
   getTypeLabel(type: string): string {
-    switch (type) {
-      case 'PANNE':
-        return 'Panne';
-      case 'RETOUR_ANTICIPE':
-        return 'Retour anticipé';
-      case 'PROLONGATION':
-        return 'Prolongation';
-      case 'DYSFONCTIONNEMENT':
-        return 'Dysfonctionnement';
-      default:
-        return type;
-    }
+    return type; // déjà lisible, pas besoin de transformer
   }
 }
