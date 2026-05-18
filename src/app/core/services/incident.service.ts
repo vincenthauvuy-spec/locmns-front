@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiClientService } from '../api/api-client.service';
 
 export interface Incident {
   idIncident: number;
@@ -20,22 +20,21 @@ export interface IncidentRequest {
 
 @Injectable({ providedIn: 'root' })
 export class IncidentService {
-  private http = inject(HttpClient);
-  private readonly API = 'http://localhost:8080/api';
+  private readonly api = inject(ApiClientService);
 
   getAll() {
-    return this.http.get<Incident[]>(`${this.API}/incidents`);
+    return this.api.get<Incident[]>('/incidents');
   }
 
   getById(id: number) {
-    return this.http.get<Incident>(`${this.API}/incidents/${id}`);
+    return this.api.get<Incident>(`/incidents/${id}`);
   }
 
   signalerIncident(request: IncidentRequest) {
-    return this.http.post<Incident>(`${this.API}/incidents/signaler`, request);
+    return this.api.post<Incident>('/incidents/signaler', request);
   }
 
   deleteById(id: number) {
-    return this.http.delete<void>(`${this.API}/incidents/${id}`);
+    return this.api.delete<void>(`/incidents/${id}`);
   }
 }

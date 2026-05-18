@@ -1,7 +1,8 @@
 import { Injectable, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
+import { ApiClientService } from '../api/api-client.service';
 
 export interface User {
   email: string;
@@ -18,7 +19,8 @@ export interface AuthResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly API = 'http://localhost:8080/api';
+  private readonly api = inject(ApiClientService);
+  private readonly router = inject(Router);
 
   // Signal = état réactif moderne (Angular 16+)
   private _user = signal<User | null>(this.loadUser());
@@ -30,13 +32,8 @@ export class AuthService {
   readonly isGestionnaire = computed(() => this._user()?.role === 'GESTIONNAIRE');
   readonly isEmprunteur = computed(() => this._user()?.role === 'EMPRUNTEUR');
 
-  constructor(
-    private http: HttpClient,
-    private router: Router,
-  ) {}
-
   login(email: string, password: string) {
-    return this.http.post<AuthResponse>(`${this.API}/auth/login`, { email, password }).pipe(
+    return this.api.post<AuthResponse>('/auth/login', { email, password }).pipe(
       tap((response) => {
         localStorage.setItem('access_token', response.token);
         this._token.set(response.token);

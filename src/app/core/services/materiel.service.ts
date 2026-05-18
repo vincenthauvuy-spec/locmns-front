@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { ApiClientService } from '../api/api-client.service';
 
 export interface Materiel {
   idMateriel: number;
@@ -11,6 +11,7 @@ export interface Materiel {
   estLouable: boolean;
   etat: string;
   categorie: string;
+  statut?: 'DISPONIBLE' | 'EN_COURS' | 'EN_RETARD';
 }
 
 export interface Categorie {
@@ -44,46 +45,51 @@ export interface MaterielRequest {
 
 @Injectable({ providedIn: 'root' })
 export class MaterielService {
-  private http = inject(HttpClient);
-  private readonly API = 'http://localhost:8080/api';
+  private readonly api = inject(ApiClientService);
 
   getAll() {
-    return this.http.get<Materiel[]>(`${this.API}/materiels`);
+    return this.api.get<Materiel[]>('/materiels');
   }
 
   getDisponibles() {
-    return this.http.get<Materiel[]>(`${this.API}/materiels/disponibles`);
+    return this.api.get<Materiel[]>('/materiels/disponibles');
   }
 
   getById(id: number) {
-    return this.http.get<Materiel>(`${this.API}/materiels/${id}`);
+    return this.api.get<Materiel>(`/materiels/${id}`);
   }
 
   create(request: MaterielRequest) {
-    return this.http.post<Materiel>(`${this.API}/materiels`, request);
+    return this.api.post<Materiel>('/materiels', request);
   }
 
   update(id: number, request: MaterielRequest) {
-    return this.http.put<Materiel>(`${this.API}/materiels/${id}`, request);
+    return this.api.put<Materiel>(`/materiels/${id}`, request);
   }
 
   delete(id: number) {
-    return this.http.delete(`${this.API}/materiels/${id}`);
+    return this.api.delete<void>(`/materiels/${id}`);
   }
 
   getCategories() {
-    return this.http.get<Categorie[]>(`${this.API}/categories`);
+    return this.api.get<Categorie[]>('/categories');
   }
 
   getEtats() {
-    return this.http.get<Etat[]>(`${this.API}/etats`);
+    return this.api.get<Etat[]>('/etats');
   }
 
   getModeles() {
-    return this.http.get<Modele[]>(`${this.API}/modeles`);
+    return this.api.get<Modele[]>('/modeles');
   }
 
   getLocalisations() {
-    return this.http.get<Localisation[]>(`${this.API}/localisations`);
+    return this.api.get<Localisation[]>('/localisations');
+  }
+
+  isDisponible(id: number, dateDebut: string, dateFin: string) {
+    return this.api.get<boolean>(
+      this.api.withQuery(`/materiels/${id}/disponible`, { dateDebut, dateFin }),
+    );
   }
 }

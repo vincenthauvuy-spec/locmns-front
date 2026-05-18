@@ -1,5 +1,7 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { ApiClientService } from '../api/api-client.service';
+import { normalizeEmpruntStatus } from './emprunt-status-normalizer';
 
 export interface Emprunt {
   idEmprunt: number;
@@ -12,6 +14,10 @@ export interface Emprunt {
   emprunteur: string;
 }
 
+interface ApiEmprunt extends Omit<Emprunt, 'statut'> {
+  statut: string;
+}
+
 export interface DemandeEmprunt {
   idMateriel: number;
   dateDebut: string;
@@ -20,29 +26,47 @@ export interface DemandeEmprunt {
 
 @Injectable({ providedIn: 'root' })
 export class EmpruntService {
-  private http = inject(HttpClient);
-  private readonly API = 'http://localhost:8080/api';
+  private readonly api = inject(ApiClientService);
+
+  private normalizeEmprunt(emprunt: ApiEmprunt): Emprunt {
+    return {
+      ...emprunt,
+      statut: normalizeEmpruntStatus(emprunt.statut) as Emprunt['statut'],
+    };
+  }
 
   getAll() {
-    return this.http.get<Emprunt[]>(`${this.API}/emprunts`);
+    return this.api
+      .get<ApiEmprunt[]>('/emprunts')
+      .pipe(map((items) => items.map((item) => this.normalizeEmprunt(item))));
   }
 
   getMesEmprunts() {
-    return this.http.get<Emprunt[]>(`${this.API}/emprunts/mes-emprunts`);
+    return this.api
+      .get<ApiEmprunt[]>('/emprunts/mes-emprunts')
+      .pipe(map((items) => items.map((item) => this.normalizeEmprunt(item))));
   }
 
   getEnAttente() {
-    return this.http.get<Emprunt[]>(`${this.API}/emprunts/en-attente`);
+    return this.api
+      .get<ApiEmprunt[]>('/emprunts/en-attente')
+      .pipe(map((items) => items.map((item) => this.normalizeEmprunt(item))));
   }
 
   demandeEmprunt(demande: DemandeEmprunt) {
-    return this.http.post<Emprunt>(`${this.API}/emprunts/demande`, demande);
+    return this.api
+      .post<ApiEmprunt>('/emprunts/demande', demande)
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
 
   valider(id: number, decision: boolean) {
-    return this.http.put<Emprunt>(`${this.API}/emprunts/${id}/valider?decision=${decision}`, {});
+    return this.api
+      .put<ApiEmprunt>(this.api.withQuery(`/emprunts/${id}/valider`, { decision }), {})
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
   annuler(id: number) {
-    return this.http.patch<Emprunt>(`${this.API}/emprunts/${id}/annuler`, {});
+    return this.api
+      .patch<ApiEmprunt>(`/emprunts/${id}/annuler`, {})
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
 }
