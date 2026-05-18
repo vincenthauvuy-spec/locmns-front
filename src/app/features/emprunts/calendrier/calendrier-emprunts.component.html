@@ -1,0 +1,285 @@
+<div class="space-y-5">
+  <!-- En-tête -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">Calendrier des emprunts</h1>
+      <p class="text-sm mt-1 text-base-content/60">Vue semaine · {{ getTitreSemaine() }}</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button
+        (click)="prevSemaine()"
+        class="px-3 py-2 rounded-xl border border-base-300 text-sm text-base-content hover:bg-base-200 transition-all"
+      >
+        ← Préc.
+      </button>
+      <button
+        (click)="resetSemaine()"
+        class="px-3 py-2 rounded-xl border border-base-300 text-sm text-base-content hover:bg-base-200 transition-all"
+      >
+        Aujourd'hui
+      </button>
+      <button
+        (click)="nextSemaine()"
+        class="px-3 py-2 rounded-xl border border-base-300 text-sm text-base-content hover:bg-base-200 transition-all"
+      >
+        Suiv. →
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  @if (!loading()) {
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="rounded-xl border border-base-300 bg-base-100 p-4 text-center">
+        <p class="text-2xl font-bold text-base-content">{{ stats.total }}</p>
+        <p class="text-xs text-base-content/50 mt-1">Total</p>
+      </div>
+      <div class="rounded-xl border border-base-300 bg-base-100 p-4 text-center">
+        <p class="text-2xl font-bold" style="color: #22c55e">{{ stats.enCours }}</p>
+        <p class="text-xs text-base-content/50 mt-1">En cours</p>
+      </div>
+      <div class="rounded-xl border border-base-300 bg-base-100 p-4 text-center">
+        <p class="text-2xl font-bold" style="color: #ef4444">{{ stats.enRetard }}</p>
+        <p class="text-xs text-base-content/50 mt-1">En retard</p>
+      </div>
+      <div class="rounded-xl border border-base-300 bg-base-100 p-4 text-center">
+        <p class="text-2xl font-bold" style="color: #25176e">{{ stats.aVenir }}</p>
+        <p class="text-xs text-base-content/50 mt-1">À venir</p>
+      </div>
+    </div>
+  }
+
+  <!-- Filtres -->
+  <div class="flex flex-wrap gap-3 items-center">
+    <div>
+      <label class="text-xs text-base-content/50 block mb-1">Catégorie</label>
+      <select
+        [(ngModel)]="filtreCategorie"
+        (ngModelChange)="onCategorieChange()"
+        class="px-3 py-2 rounded-xl border border-base-300 bg-base-100 text-sm text-base-content outline-none"
+      >
+        <option value="TOUS">Toutes les catégories</option>
+        @for (cat of categoriesUniques; track cat) {
+          <option [value]="cat">{{ cat }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="text-xs text-base-content/50 block mb-1">Matériel</label>
+      <select
+        [(ngModel)]="filtreMateriel"
+        class="px-3 py-2 rounded-xl border border-base-300 bg-base-100 text-sm text-base-content outline-none"
+      >
+        <option value="TOUS">Tous les matériels</option>
+        @for (nom of materielsFiltres; track nom) {
+          <option [value]="nom">{{ nom }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Chargement -->
+  @if (loading()) {
+    <div class="flex items-center gap-2 text-base-content/60">
+      <span class="loading loading-spinner loading-sm"></span>
+      Chargement...
+    </div>
+  } @else if (materielsFiltres.length === 0) {
+    <div class="rounded-xl p-8 text-center bg-base-200">
+      <p class="text-base-content/60">Aucun emprunt sur cette période.</p>
+    </div>
+  } @else {
+    <!-- VUE DESKTOP : grille semaine (cachée sur mobile) -->
+    <div class="hidden md:block rounded-2xl border border-base-300 bg-base-100 overflow-x-auto">
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr>
+            <th
+              class="text-left px-3 py-3 text-xs font-medium text-base-content/50 border-b border-base-300 w-36"
+            >
+              Matériel
+            </th>
+            @for (jour of getJoursSemaine(); track jour.toISOString(); let i = $index) {
+              <th
+                class="px-2 py-3 text-center border-b border-base-300 text-xs font-medium"
+                [style.background]="isToday(jour) ? '#25176E' : ''"
+                [class.text-white]="isToday(jour)"
+                [class.text-base-content]="!isToday(jour)"
+              >
+                <div>{{ jourNoms[i] }}</div>
+                <div class="text-base font-bold mt-0.5">{{ jour.getDate() }}</div>
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (mat of materielsFiltres; track mat) {
+            <tr class="border-b border-base-300/50 hover:bg-base-200/40 transition-colors">
+              <td
+                class="px-3 py-2 text-xs font-medium text-base-content/70 align-top max-w-[140px] overflow-hidden text-ellipsis whitespace-nowrap"
+                [title]="mat"
+              >
+                {{ mat }}
+              </td>
+              @for (jour of getJoursSemaine(); track jour.toISOString()) {
+                <td class="px-1 py-1 align-top" [class.bg-blue-50]="isToday(jour)">
+                  @for (emprunt of getEmpruntsJour(mat, jour); track emprunt.idEmprunt) {
+                    <div
+                      class="rounded px-2 py-1 text-xs cursor-pointer mb-0.5 transition-all"
+                      [class]="getStatutClasses(emprunt.statut)"
+                      [class.outline]="empruntSelectionne()?.idEmprunt === emprunt.idEmprunt"
+                      [style.outline-color]="'#25176E'"
+                      (click)="selectionner(emprunt)"
+                    >
+                      <div class="font-medium truncate">
+                        {{ isGestionnaire() ? emprunt.emprunteur.split(' ')[0] : emprunt.materiel }}
+                      </div>
+                    </div>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- VUE MOBILE : liste par jour (visible uniquement sur mobile) -->
+    <div class="md:hidden space-y-3">
+      @for (jour of getJoursSemaine(); track jour.toISOString(); let i = $index) {
+        @if (getEmpruntsJour_tous(jour).length > 0) {
+          <div
+            class="rounded-2xl border bg-base-100 overflow-hidden"
+            [class.border-blue-400]="isToday(jour)"
+            [class.border-base-300]="!isToday(jour)"
+          >
+            <!-- En-tête du jour -->
+            <div
+              class="px-4 py-2.5 flex items-center gap-2 border-b border-base-300"
+              [style.background]="isToday(jour) ? '#25176E' : ''"
+            >
+              <span
+                class="text-sm font-bold"
+                [class.text-white]="isToday(jour)"
+                [class.text-base-content]="!isToday(jour)"
+              >
+                {{ jourNoms[i] }} {{ jour.getDate() }}
+              </span>
+              @if (isToday(jour)) {
+                <span class="text-xs text-white/70">Aujourd'hui</span>
+              }
+              <span
+                class="ml-auto text-xs font-medium"
+                [class.text-white/70]="isToday(jour)"
+                [class.text-base-content/50]="!isToday(jour)"
+              >
+                {{ getEmpruntsJour_tous(jour).length }} emprunt{{
+                  getEmpruntsJour_tous(jour).length > 1 ? 's' : ''
+                }}
+              </span>
+            </div>
+
+            <!-- Emprunts du jour -->
+            <div class="divide-y divide-base-300/50">
+              @for (emprunt of getEmpruntsJour_tous(jour); track emprunt.idEmprunt) {
+                <div
+                  class="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-base-200/50 transition-colors"
+                  [class.bg-base-200]="empruntSelectionne()?.idEmprunt === emprunt.idEmprunt"
+                  (click)="selectionner(emprunt)"
+                >
+                  <span
+                    class="w-2 h-2 rounded-full flex-shrink-0"
+                    [style.background]="getStatutDot(emprunt.statut)"
+                  ></span>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-base-content truncate">
+                      {{ emprunt.materiel }}
+                    </p>
+                    @if (isGestionnaire()) {
+                      <p class="text-xs text-base-content/50 truncate">{{ emprunt.emprunteur }}</p>
+                    }
+                  </div>
+                  <span class="text-xs text-base-content/50 flex-shrink-0">
+                    {{ emprunt.dateDebut | date: 'dd/MM' }} →
+                    {{ emprunt.dateFinPrevue | date: 'dd/MM' }}
+                  </span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Aucun emprunt cette semaine -->
+      @if (getEmpruntsJour_tous_semaine().length === 0) {
+        <div class="rounded-xl p-6 text-center bg-base-200">
+          <p class="text-base-content/60 text-sm">Aucun emprunt cette semaine.</p>
+        </div>
+      }
+    </div>
+
+    <!-- Légende -->
+    <div class="flex flex-wrap gap-4 text-xs text-base-content/50">
+      @for (
+        item of [
+          { label: 'En cours', color: '#22C55E' },
+          { label: 'En retard', color: '#EF4444' },
+          { label: 'Terminé / Annulé', color: '#9CA3AF' },
+        ];
+        track item.label
+      ) {
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-sm inline-block" [style.background]="item.color"></span>
+          {{ item.label }}
+        </div>
+      }
+    </div>
+
+    <!-- Panneau détail -->
+    @if (empruntSelectionne(); as e) {
+      <div class="rounded-2xl border border-base-300 bg-base-100 p-5 space-y-3">
+        <div class="flex items-start justify-between">
+          <h2 class="font-semibold text-base-content text-base">{{ e.materiel }}</h2>
+          <button
+            (click)="empruntSelectionne.set(null)"
+            class="text-base-content/40 hover:text-base-content text-lg leading-none"
+          >
+            ✕
+          </button>
+        </div>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+          @if (isGestionnaire()) {
+            <div>
+              <span class="text-base-content/50">Emprunteur</span>
+              <p class="font-medium text-base-content mt-0.5">{{ e.emprunteur }}</p>
+            </div>
+          }
+          <div>
+            <span class="text-base-content/50">Période</span>
+            <p class="font-medium text-base-content mt-0.5">
+              {{ e.dateDebut | date: 'dd/MM/yyyy' }} → {{ e.dateFinPrevue | date: 'dd/MM/yyyy' }}
+            </p>
+          </div>
+          @if (e.dateFinReelle) {
+            <div>
+              <span class="text-base-content/50">Rendu le</span>
+              <p class="font-medium text-base-content mt-0.5">
+                {{ e.dateFinReelle | date: 'dd/MM/yyyy' }}
+              </p>
+            </div>
+          }
+          <div>
+            <span class="text-base-content/50">Statut</span>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span
+                class="w-2 h-2 rounded-full inline-block"
+                [style.background]="getStatutDot(e.statut)"
+              ></span>
+              <span class="font-medium text-base-content">{{ getStatutLabel(e.statut) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

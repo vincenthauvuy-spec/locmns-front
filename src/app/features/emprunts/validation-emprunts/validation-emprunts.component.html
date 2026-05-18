@@ -1,14 +1,42 @@
 <div class="space-y-6">
-
   <!-- En-tête -->
-  <div class="flex items-center justify-between">
+  <div class="flex items-center justify-between flex-wrap gap-3">
     <div>
-      <h1 class="text-2xl font-bold text-base-content">Validation des emprunts</h1>
+      <h1 class="text-2xl font-bold text-base-content">Historique des emprunts</h1>
       <p class="text-sm mt-1 text-base-content/60">
-        {{ emprunts().length }} demande(s) en attente
+        {{ emprunts().length }} emprunt{{ emprunts().length > 1 ? 's' : '' }} au total
       </p>
     </div>
   </div>
+
+  <!-- Recherche -->
+  <input
+    type="text"
+    [value]="recherche()"
+    (input)="recherche.set($any($event.target).value)"
+    placeholder="Rechercher un emprunteur ou un matériel..."
+    class="w-full px-4 py-2.5 rounded-xl border border-base-300 bg-base-100 text-sm text-base-content outline-none focus:border-base-content/30 transition-all"
+  />
+
+  <!-- Filtres -->
+  @if (!loading()) {
+    <div class="flex gap-2 flex-wrap">
+      @for (f of filtres; track f.key) {
+        <button
+          (click)="setFiltre(f.key)"
+          class="px-4 py-1.5 rounded-full text-xs font-semibold border transition-all"
+          [style.background]="filtreActif() === f.key ? '#25176E' : 'transparent'"
+          [style.color]="filtreActif() === f.key ? 'white' : ''"
+          [class.border-base-300]="filtreActif() !== f.key"
+          [class.text-base-content]="filtreActif() !== f.key"
+          [class.border-transparent]="filtreActif() === f.key"
+        >
+          {{ f.label }}
+          <span class="ml-1 opacity-70">({{ compter(f.key) }})</span>
+        </button>
+      }
+    </div>
+  }
 
   <!-- Chargement -->
   @if (loading()) {
@@ -16,62 +44,65 @@
       <span class="loading loading-spinner loading-sm"></span>
       Chargement...
     </div>
-  }
-
-  <!-- Aucune demande -->
-  @else if (emprunts().length === 0) {
+  } @else if (empruntsFiltres.length === 0) {
     <div class="rounded-xl p-8 text-center bg-base-200">
-      <p class="text-base-content/60">Aucune demande en attente.</p>
+      <p class="text-base-content/60 font-medium">Aucun emprunt dans cette catégorie.</p>
     </div>
-  }
-
-  <!-- Liste des demandes -->
-  @else {
+  } @else {
     <div class="space-y-3">
-      @for (emprunt of emprunts(); track emprunt.idEmprunt) {
-        <div class="rounded-2xl p-5 border border-base-300 bg-base-100">
-          <div class="flex items-center justify-between gap-4">
-
-            <!-- Infos emprunt -->
-            <div class="space-y-1 flex-1">
+      @for (emprunt of empruntsFiltres; track emprunt.idEmprunt) {
+        <div
+          class="rounded-2xl p-5 border border-base-300 bg-base-100 transition-all hover:border-base-content/20"
+          [style.opacity]="emprunt.statut === 'RENDU' || emprunt.statut === 'REFUSE' ? '0.7' : '1'"
+        >
+          <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div class="flex-1 space-y-1">
               <p class="font-semibold text-base-content">{{ emprunt.materiel }}</p>
-              <p class="text-sm text-base-content/60">
-                Demandé par <span class="font-medium">{{ emprunt.emprunteur }}</span>
+              <p class="text-xs text-base-content/60">
+                Emprunté par <span class="font-medium">{{ emprunt.emprunteur }}</span>
               </p>
               <p class="text-xs text-base-content/50">
-                Du {{ emprunt.dateDebut | date:'dd/MM/yyyy' }}
-                au {{ emprunt.dateFinPrevue | date:'dd/MM/yyyy' }}
+                Du {{ emprunt.dateDebut | date: 'dd/MM/yyyy' }} au
+                {{ emprunt.dateFinPrevue | date: 'dd/MM/yyyy' }}
+                @if (emprunt.dateFinReelle) {
+                  · Rendu le {{ emprunt.dateFinReelle | date: 'dd/MM/yyyy' }}
+                }
               </p>
             </div>
 
-            <!-- Boutons -->
-            <div class="flex items-center gap-2">
-              <button (click)="valider(emprunt.idEmprunt, false)"
-                      [disabled]="traitement() === emprunt.idEmprunt"
-                      class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-                      style="background-color: #EF4444;">
-                @if (traitement() === emprunt.idEmprunt) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
-                  Refuser
-                }
-              </button>
-              <button (click)="valider(emprunt.idEmprunt, true)"
-                      [disabled]="traitement() === emprunt.idEmprunt"
-                      class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-                      style="background-color: #22C55E;">
-                @if (traitement() === emprunt.idEmprunt) {
-                  <span class="loading loading-spinner loading-sm"></span>
-                } @else {
-                  Valider
-                }
-              </button>
-            </div>
+            <div class="flex items-center gap-3">
+              <!-- Badge statut -->
+              <span
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                [class]="getStatutClass(emprunt.statut)"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [style.background]="getStatutDot(emprunt.statut)"
+                ></span>
+                {{ getStatutLabel(emprunt.statut) }}
+              </span>
 
+              <!-- Forcer retour (cas exceptionnel, visible uniquement pour EN_COURS / EN_RETARD) -->
+              @if (emprunt.statut === 'EN_COURS' || emprunt.statut === 'EN_RETARD') {
+                <button
+                  (click)="forceRetour(emprunt.idEmprunt)"
+                  [disabled]="traitement() === emprunt.idEmprunt"
+                  class="text-xs px-3 py-1 rounded-lg border transition-all"
+                  style="color: #ef4444; border-color: #fecaca; background: #fef2f2"
+                  title="Forcer la clôture de cet emprunt"
+                >
+                  @if (traitement() === emprunt.idEmprunt) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    Forcer retour
+                  }
+                </button>
+              }
+            </div>
           </div>
         </div>
       }
     </div>
   }
-
 </div>

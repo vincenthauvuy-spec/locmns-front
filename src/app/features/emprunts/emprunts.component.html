@@ -63,10 +63,20 @@
           </div>
         </div>
 
-        <button type="submit" [disabled]="submitting() || form.invalid"
+        <!-- Indicateur disponibilité -->
+        @if (checkingDispo()) {
+          <p class="text-xs text-base-content/50">Vérification de la disponibilité...</p>
+        } @else if (disponibilite() === true) {
+          <p class="text-xs font-medium" style="color:#22C55E;">✓ Matériel disponible sur cette période</p>
+        } @else if (disponibilite() === false) {
+          <p class="text-xs font-medium" style="color:#EF4444;">✗ Matériel non disponible sur cette période</p>
+        }
+
+        <button type="submit"
+                [disabled]="submitting() || form.invalid || disponibilite() === false"
                 class="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
                 style="background-color: #FF5D2D;"
-                [style.opacity]="submitting() || form.invalid ? '0.6' : '1'">
+                [style.opacity]="submitting() || form.invalid || disponibilite() === false ? '0.6' : '1'">
           @if (submitting()) {
             <span class="loading loading-spinner loading-sm"></span>
           } @else {
@@ -117,12 +127,9 @@
       @for (emprunt of empruntsFiltres; track emprunt.idEmprunt) {
         <div class="rounded-2xl p-5 border border-base-300 bg-base-100 transition-all hover:border-base-content/20"
              [style.opacity]="emprunt.statut === 'RENDU' || emprunt.statut === 'REFUSE' ? '0.65' : '1'">
-
           <div class="flex items-center justify-between gap-4">
-            <!-- Infos matériel -->
             <div class="flex-1 space-y-1">
               <p class="font-semibold text-base-content">{{ emprunt.materiel }}</p>
-              
               @if (isGestionnaire()) {
                 <p class="text-xs text-base-content/60">{{ emprunt.emprunteur }}</p>
               }
@@ -134,18 +141,13 @@
                 }
               </p>
             </div>
-
-            <!-- Statut + action -->
             <div class="flex flex-col items-end gap-2">
-              <!-- Badge statut custom -->
               <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
                     [class]="getStatutClass(emprunt.statut)">
                 <span class="w-1.5 h-1.5 rounded-full"
                       [style.background]="getStatutDot(emprunt.statut)"></span>
                 {{ getStatutLabel(emprunt.statut) }}
               </span>
-
-              <!-- Bouton annuler (EN_ATTENTE uniquement, emprunteur uniquement) -->
               @if (!isGestionnaire() && peutAnnuler(emprunt)) {
                 <button (click)="annuler(emprunt.idEmprunt)"
                         [disabled]="annulationEnCours() === emprunt.idEmprunt"

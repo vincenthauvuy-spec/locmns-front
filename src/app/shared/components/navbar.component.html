@@ -1,31 +1,35 @@
 <nav
-  class="h-16 flex items-center justify-between px-6"
+  class="fixed top-0 left-0 w-full z-50 h-16 flex items-center px-6"
   style="background: linear-gradient(90deg, #25176e, #2139d1)"
 >
-  <a routerLink="/dashboard" class="flex items-center gap-3">
-    <div
-      class="w-8 h-8 rounded-lg flex items-center justify-center"
-      style="background-color: rgba(255, 255, 255, 0.15)"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-5 h-5 text-white"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        stroke-width="1.5"
+  <!-- GAUCHE : LOGO -->
+  <div class="flex items-center flex-1">
+    <a routerLink="/dashboard" class="flex items-center gap-3">
+      <div
+        class="w-8 h-8 rounded-lg flex items-center justify-center"
+        style="background-color: rgba(255, 255, 255, 0.15)"
       >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V11"
-        />
-      </svg>
-    </div>
-    <span class="text-white font-bold text-lg tracking-tight">LOCMNS</span>
-  </a>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 text-white"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 10V11"
+          />
+        </svg>
+      </div>
+      <span class="text-white font-bold text-lg tracking-tight">LOCMNS</span>
+    </a>
+  </div>
 
-  <div class="hidden md:flex items-center gap-1">
+  <!-- CENTRE : MENU DESKTOP -->
+  <div class="hidden md:flex flex-1 justify-center items-center gap-1">
     <a
       routerLink="/dashboard"
       routerLinkActive="bg-white/20"
@@ -43,6 +47,7 @@
     <a
       routerLink="/emprunts"
       routerLinkActive="bg-white/20"
+      [routerLinkActiveOptions]="{ exact: true }"
       class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
     >
       Emprunts
@@ -54,12 +59,53 @@
     >
       Incidents
     </a>
+
+    <!-- Notifications avec pastille -->
+    <a
+      routerLink="/notifications"
+      routerLinkActive="bg-white/20"
+      class="relative px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+    >
+      Notifications
+      <span
+        *ngIf="nbNotifications() > 0"
+        class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
+        style="background-color: #ef4444"
+      >
+        {{ nbNotifications() > 99 ? '99+' : nbNotifications() }}
+      </span>
+    </a>
+
+    <!-- Liens gestionnaire uniquement -->
+    @if (isGestionnaire()) {
+      <a
+        routerLink="/emprunts/calendrier"
+        routerLinkActive="bg-white/20"
+        class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      >
+        Calendrier
+      </a>
+      <a
+        routerLink="/utilisateurs"
+        routerLinkActive="bg-white/20"
+        class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      >
+        Utilisateurs
+      </a>
+    }
   </div>
 
-  <div class="flex items-center gap-3">
+  <!-- DROITE : ACTIONS -->
+  <div class="flex flex-1 justify-end items-center gap-3">
+    <!-- BURGER MOBILE -->
+    <button class="md:hidden text-white text-2xl" (click)="toggleMenu()">☰</button>
+
+    <!-- USER -->
     <div class="text-right hidden sm:block">
       <p class="text-white text-sm font-medium">{{ user()?.email }}</p>
     </div>
+
+    <!-- THEME -->
     <button
       (click)="toggleTheme()"
       class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all"
@@ -70,11 +116,82 @@
         ☾
       }
     </button>
+
+    <!-- LOGOUT -->
     <button
       (click)="logout()"
       class="px-3 py-2 rounded-lg text-sm text-white/80 hover:text-white hover:bg-white/10 transition-all"
     >
       Déconnexion
     </button>
+  </div>
+
+  <!-- MENU MOBILE -->
+  <div
+    *ngIf="menuOpen"
+    class="absolute top-16 left-0 w-full bg-[#2139d1] flex flex-col gap-1 p-4 md:hidden"
+  >
+    <a
+      routerLink="/dashboard"
+      (click)="menuOpen = false"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+    >
+      Dashboard
+    </a>
+    <a
+      routerLink="/materiels"
+      (click)="menuOpen = false"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+    >
+      Matériels
+    </a>
+    <a
+      routerLink="/emprunts"
+      (click)="menuOpen = false"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+    >
+      Emprunts
+    </a>
+    <a
+      routerLink="/incidents"
+      (click)="menuOpen = false"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+    >
+      Incidents
+    </a>
+
+    <!-- Notifications avec pastille mobile -->
+    <a
+      routerLink="/notifications"
+      (click)="menuOpen = false"
+      class="relative px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all flex items-center gap-2"
+    >
+      Notifications
+      <span
+        *ngIf="nbNotifications() > 0"
+        class="min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
+        style="background-color: #ef4444"
+      >
+        {{ nbNotifications() > 99 ? '99+' : nbNotifications() }}
+      </span>
+    </a>
+
+    <!-- Liens gestionnaire uniquement (mobile) -->
+    @if (isGestionnaire()) {
+      <a
+        routerLink="/emprunts/calendrier"
+        (click)="menuOpen = false"
+        class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      >
+        Calendrier
+      </a>
+      <a
+        routerLink="/utilisateurs"
+        (click)="menuOpen = false"
+        class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      >
+        Utilisateurs
+      </a>
+    }
   </div>
 </nav>

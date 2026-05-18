@@ -1,0 +1,189 @@
+<!-- Header -->
+<div class="flex items-center justify-between mb-6">
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">Utilisateurs</h1>
+    <p class="text-sm text-base-content/50 mt-1">Gestion des comptes</p>
+  </div>
+  <button
+    (click)="ouvrirCreation()"
+    class="px-4 py-2 rounded-xl text-sm font-semibold text-white flex items-center gap-2"
+    style="background-color: #2139d1"
+  >
+    + Nouvel utilisateur
+  </button>
+</div>
+
+<!-- Chargement -->
+<div *ngIf="loading()" class="flex items-center gap-2 text-base-content/60">
+  <span class="loading loading-spinner loading-sm"></span> Chargement...
+</div>
+
+<!-- Erreur -->
+<p *ngIf="erreur()" class="text-sm text-red-500">{{ erreur() }}</p>
+
+<!-- Tableau -->
+<div *ngIf="!loading() && !erreur()" class="rounded-2xl border border-base-300 bg-base-100 overflow-hidden">
+  <table class="w-full text-sm">
+    <thead>
+      <tr class="border-b border-base-300 text-left text-xs text-base-content/50 uppercase tracking-wide">
+        <th class="px-5 py-3">Utilisateur</th>
+        <th class="px-5 py-3">Email</th>
+        <th class="px-5 py-3">Rôle</th>
+        <th class="px-5 py-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-base-300">
+      <tr *ngFor="let u of utilisateurs()" class="hover:bg-base-200 transition-colors">
+        <!-- Avatar + Nom -->
+        <td class="px-5 py-3">
+          <div class="flex items-center gap-3">
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold flex-shrink-0"
+              style="background:#EEEDFE; color:#534AB7"
+            >
+              {{ getInitiales(u.nom, u.prenom) }}
+            </div>
+            <span class="font-medium text-base-content">{{ u.prenom }} {{ u.nom }}</span>
+          </div>
+        </td>
+        <!-- Email -->
+        <td class="px-5 py-3 text-base-content/60">{{ u.email }}</td>
+        <!-- Rôle -->
+        <td class="px-5 py-3">
+          <span
+            class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+            [style.background]="getRoleBadge(u.role).bg"
+            [style.color]="getRoleBadge(u.role).color"
+          >
+            {{ u.role }}
+          </span>
+        </td>
+        <!-- Actions -->
+        <td class="px-5 py-3 text-right">
+          <div class="flex items-center justify-end gap-2">
+            <button
+              (click)="ouvrirRole(u)"
+              class="px-3 py-1 rounded-lg text-xs font-medium border border-base-300 text-base-content/70 hover:bg-base-200 transition-colors"
+            >
+              Changer rôle
+            </button>
+            <button
+              (click)="ouvrirSuppression(u)"
+              class="px-3 py-1 rounded-lg text-xs font-medium text-red-500 border border-red-200 hover:bg-red-50 transition-colors"
+            >
+              Supprimer
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="utilisateurs().length === 0" class="px-5 py-8 text-center text-sm text-base-content/50">
+    Aucun utilisateur trouvé.
+  </p>
+</div>
+
+<!-- MODALE création -->
+<div *ngIf="modalCreation()" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)" (click)="modalCreation.set(false)">
+  <div class="bg-base-100 rounded-2xl p-6 w-full max-w-md shadow-2xl" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold text-base-content">Nouvel utilisateur</h3>
+      <button (click)="modalCreation.set(false)" class="text-base-content/40 hover:text-base-content text-xl leading-none">✕</button>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="text-xs font-medium text-base-content/60 mb-1 block">Prénom</label>
+          <input type="text" [ngModel]="formPrenom()" (ngModelChange)="formPrenom.set($event)"
+            class="w-full rounded-xl border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-primary" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-base-content/60 mb-1 block">Nom</label>
+          <input type="text" [ngModel]="formNom()" (ngModelChange)="formNom.set($event)"
+            class="w-full rounded-xl border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-primary" />
+        </div>
+      </div>
+      <div>
+        <label class="text-xs font-medium text-base-content/60 mb-1 block">Email</label>
+        <input type="email" [ngModel]="formEmail()" (ngModelChange)="formEmail.set($event)"
+          class="w-full rounded-xl border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-primary" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-base-content/60 mb-1 block">Mot de passe</label>
+        <input type="password" [ngModel]="formMotDePasse()" (ngModelChange)="formMotDePasse.set($event)"
+          class="w-full rounded-xl border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-primary" />
+      </div>
+      <div>
+        <label class="text-xs font-medium text-base-content/60 mb-1 block">Rôle</label>
+        <select [ngModel]="formIdRole()" (ngModelChange)="formIdRole.set(+$event)"
+          class="w-full rounded-xl border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-primary">
+          <option *ngFor="let r of roles" [value]="r.idRole">{{ r.nom }}</option>
+        </select>
+      </div>
+    </div>
+
+    <p *ngIf="formErreur()" class="text-xs text-red-500 mt-3">{{ formErreur() }}</p>
+
+    <button
+      (click)="creerUtilisateur()"
+      [disabled]="formEnCours()"
+      class="mt-5 w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity"
+      style="background-color: #2139d1"
+      [class.opacity-60]="formEnCours()"
+    >
+      <span *ngIf="formEnCours()" class="loading loading-spinner loading-xs mr-2"></span>
+      {{ formEnCours() ? 'Création...' : 'Créer le compte' }}
+    </button>
+  </div>
+</div>
+
+<!-- MODALE changement de rôle -->
+<div *ngIf="modalRole()" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)" (click)="modalRole.set(null)">
+  <div class="bg-base-100 rounded-2xl p-6 w-full max-w-sm shadow-2xl" (click)="$event.stopPropagation()">
+    <div class="flex items-center justify-between mb-5">
+      <h3 class="text-lg font-bold text-base-content">Changer le rôle</h3>
+      <button (click)="modalRole.set(null)" class="text-base-content/40 hover:text-base-content text-xl leading-none">✕</button>
+    </div>
+    <p class="text-sm text-base-content/60 mb-4">
+      {{ modalRole()?.prenom }} {{ modalRole()?.nom }}
+    </p>
+    <select [ngModel]="nouveauRole()" (ngModelChange)="nouveauRole.set(+$event)"
+      class="w-full rounded-xl border border-base-300 bg-base-200 px-3 py-2 text-sm text-base-content focus:outline-none focus:border-primary mb-5">
+      <option *ngFor="let r of roles" [value]="r.idRole">{{ r.nom }}</option>
+    </select>
+    <button
+      (click)="changerRole()"
+      [disabled]="roleEnCours()"
+      class="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity"
+      style="background-color: #2139d1"
+      [class.opacity-60]="roleEnCours()"
+    >
+      {{ roleEnCours() ? 'Enregistrement...' : 'Enregistrer' }}
+    </button>
+  </div>
+</div>
+
+<!-- MODALE suppression -->
+<div *ngIf="modalSuppression()" class="fixed inset-0 z-50 flex items-center justify-center p-4" style="background:rgba(0,0,0,0.5)" (click)="modalSuppression.set(null)">
+  <div class="bg-base-100 rounded-2xl p-6 w-full max-w-sm shadow-2xl" (click)="$event.stopPropagation()">
+    <h3 class="text-lg font-bold text-base-content mb-2">Confirmer la suppression</h3>
+    <p class="text-sm text-base-content/60 mb-6">
+      Supprimer <span class="font-semibold text-base-content">{{ modalSuppression()?.prenom }} {{ modalSuppression()?.nom }}</span> ? Cette action est irréversible.
+    </p>
+    <div class="flex gap-3">
+      <button (click)="modalSuppression.set(null)" class="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-base-300 text-base-content/70 hover:bg-base-200 transition-colors">
+        Annuler
+      </button>
+      <button
+        (click)="confirmerSuppression()"
+        [disabled]="suppressionEnCours()"
+        class="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+        [class.opacity-60]="suppressionEnCours()"
+      >
+        {{ suppressionEnCours() ? 'Suppression...' : 'Supprimer' }}
+      </button>
+    </div>
+  </div>
+</div>

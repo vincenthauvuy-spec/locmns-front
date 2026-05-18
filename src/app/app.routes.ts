@@ -37,6 +37,15 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/emprunts/emprunts.component').then((m) => m.EmpruntsComponent),
       },
+      // Calendrier des emprunts — accessible à tous les utilisateurs connectés
+      {
+        path: 'emprunts/calendrier',
+        loadComponent: () =>
+          import('./features/emprunts/calendrier/calendrier-emprunts.component').then(
+            (m) => m.CalendrierEmpruntsComponent,
+          ),
+      },
+      // Historique / gestion des emprunts — gestionnaire uniquement
       {
         path: 'emprunts/validation',
         canActivate: [roleGuard('GESTIONNAIRE')],
@@ -49,6 +58,21 @@ export const routes: Routes = [
         path: 'incidents',
         loadComponent: () =>
           import('./features/incidents/incidents.component').then((m) => m.IncidentsComponent),
+      },
+      {
+        path: 'utilisateurs',
+        canActivate: [roleGuard('GESTIONNAIRE')],
+        loadComponent: () =>
+          import('./features/utilisateurs/utilisateurs.component').then(
+            (m) => m.UtilisateursComponent,
+          ),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('./features/notifications/notifications.component').then(
+            (m) => m.NotificationsComponent,
+          ),
       },
     ],
   },
