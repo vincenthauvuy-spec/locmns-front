@@ -22,7 +22,7 @@ type GroupeMateriel = {
 @Component({
   selector: 'app-materiels',
   standalone: true,
-  imports: [CommonModule, RouterLink, FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './materiels.component.html',
 })
 export class MaterielsComponent implements OnInit {
