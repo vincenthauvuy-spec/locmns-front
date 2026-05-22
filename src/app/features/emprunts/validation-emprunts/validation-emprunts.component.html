@@ -83,6 +83,25 @@
                 {{ getStatutLabel(emprunt.statut) }}
               </span>
 
+              <!-- Actions admin -->
+              @if (emprunt.statut === 'EN_ATTENTE') {
+                <div class="flex gap-2 mt-2">
+                  <button
+                    (click)="valider(emprunt.idEmprunt)"
+                    class="px-3 py-1 text-xs rounded bg-green-600 text-white hover:opacity-90"
+                  >
+                    Valider
+                  </button>
+
+                  <button
+                    (click)="refuser(emprunt.idEmprunt)"
+                    class="px-3 py-1 text-xs rounded bg-red-600 text-white hover:opacity-90"
+                  >
+                    Refuser
+                  </button>
+                </div>
+              }
+
               <!-- Forcer retour (cas exceptionnel, visible uniquement pour EN_COURS / EN_RETARD) -->
               @if (emprunt.statut === 'EN_COURS' || emprunt.statut === 'EN_RETARD') {
                 <button
