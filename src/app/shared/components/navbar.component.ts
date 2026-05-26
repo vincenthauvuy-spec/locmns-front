@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -24,14 +24,32 @@ export class NavbarComponent implements OnInit {
   menuOpen = false;
   nbNotifications = signal(0);
 
-  ngOnInit(): void {
+  constructor() {
+    effect(() => {
+      this.notificationService.refresh();
+
+      this.chargerNotifications();
+    });
+  }
+
+  ngOnInit(): void {}
+
+  chargerNotifications(): void {
     this.notificationService.getAll().subscribe({
       next: (data) => this.nbNotifications.set(data.length),
       error: () => {},
     });
   }
 
-  toggleTheme() { this.theme.toggle(); }
-  toggleMenu() { this.menuOpen = !this.menuOpen; }
-  logout(): void { this.auth.logout(); }
+  toggleTheme() {
+    this.theme.toggle();
+  }
+
+  toggleMenu() {
+    this.menuOpen = !this.menuOpen;
+  }
+
+  logout(): void {
+    this.auth.logout();
+  }
 }

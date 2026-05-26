@@ -13,8 +13,10 @@
 <p *ngIf="erreur()" class="text-sm text-red-500">{{ erreur() }}</p>
 
 <!-- Aucune notification -->
-<div *ngIf="!loading() && !erreur() && notifications().length === 0"
-  class="rounded-2xl border border-base-300 bg-base-100 px-6 py-12 text-center">
+<div
+  *ngIf="!loading() && !erreur() && notifications().length === 0"
+  class="rounded-2xl border border-base-300 bg-base-100 px-6 py-12 text-center"
+>
   <p class="text-3xl mb-3">🎉</p>
   <p class="text-base font-semibold text-base-content">Tout est en ordre !</p>
   <p class="text-sm text-base-content/50 mt-1">Vous n'avez aucune notification pour le moment.</p>
@@ -22,20 +24,28 @@
 
 <!-- Liste notifications -->
 <div *ngIf="!loading() && !erreur() && notifications().length > 0" class="flex flex-col gap-3">
-
   <!-- Alertes en premier -->
-  <div *ngFor="let n of notifications()" class="rounded-2xl border bg-base-100 px-5 py-4 flex items-start gap-4"
-    [style.border-color]="n.type === 'ALERTE' ? '#FECACA' : n.type === 'SUCCES' ? '#BBF7D0' : '#BFDBFE'">
-
+  <div
+    *ngFor="let n of notifications()"
+    (click)="ouvrirNotification(n)"
+    class="rounded-2xl border bg-base-100 px-5 py-4 flex items-start gap-4 cursor-pointer transition-all hover:scale-[1.01] hover:shadow-md"
+    [style.border-color]="
+      n.type === 'ALERTE' ? '#FECACA' : n.type === 'SUCCES' ? '#BBF7D0' : '#BFDBFE'
+    "
+  >
     <!-- Icône -->
-    <span class="text-xl flex-shrink-0 mt-0.5">{{ getIcone(n.type) }}</span>
+    <span class="text-xl flex-shrink-0 mt-0.5">
+      {{ getIcone(n.type) }}
+    </span>
 
     <!-- Message -->
     <div class="flex-1 min-w-0">
-      <p class="text-sm text-base-content">{{ n.message }}</p>
+      <p class="text-sm text-base-content">
+        {{ n.message }}
+      </p>
     </div>
 
-    <!-- Badge type -->
+    <!-- Badge -->
     <span
       class="px-2.5 py-0.5 rounded-full text-xs font-semibold flex-shrink-0"
       [style.background]="getBadge(n.type).bg"
@@ -44,5 +54,4 @@
       {{ getBadge(n.type).label }}
     </span>
   </div>
-
 </div>

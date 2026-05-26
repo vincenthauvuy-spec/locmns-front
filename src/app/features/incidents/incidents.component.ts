@@ -5,6 +5,7 @@ import { IncidentService, Incident } from '../../core/services/incident.service'
 import { MaterielService, Materiel } from '../../core/services/materiel.service';
 import { EmpruntService, Emprunt } from '../../core/services/emprunt.service';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationService } from '../../core/services/notification.service';
 
 interface TypeIncident {
   id: number;
@@ -23,6 +24,7 @@ export class IncidentsComponent implements OnInit {
   private empruntService = inject(EmpruntService);
   private auth = inject(AuthService);
   private fb = inject(FormBuilder);
+  private notificationService = inject(NotificationService);
 
   incidents = signal<Incident[]>([]);
   materiels = signal<Materiel[]>([]);
@@ -109,6 +111,7 @@ export class IncidentsComponent implements OnInit {
         this.successMessage.set('Incident signalé avec succès !');
         this.form.reset();
         this.loadIncidents();
+        this.notificationService.triggerRefresh();
         setTimeout(() => this.successMessage.set(''), 3000);
       },
       error: () => {
