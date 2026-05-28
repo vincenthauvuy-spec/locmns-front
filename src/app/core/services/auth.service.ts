@@ -6,7 +6,7 @@ import { ApiClientService } from '../api/api-client.service';
 
 export interface User {
   email: string;
-  role: 'GESTIONNAIRE' | 'EMPRUNTEUR';
+  role: 'GESTIONNAIRE' | 'STAGIAIRE' | 'INTERVENANT';
   nom: string;
   prenom: string;
 }
@@ -30,7 +30,8 @@ export class AuthService {
   readonly user = this._user.asReadonly();
   readonly isLoggedIn = computed(() => this._token() !== null);
   readonly isGestionnaire = computed(() => this._user()?.role === 'GESTIONNAIRE');
-  readonly isEmprunteur = computed(() => this._user()?.role === 'EMPRUNTEUR');
+  readonly isSTAGIAIRE = computed(() => this._user()?.role === 'STAGIAIRE');
+  readonly isIntervenant = computed(() => this._user()?.role === 'INTERVENANT');
 
   login(email: string, password: string) {
     return this.api.post<AuthResponse>('/auth/login', { email, password }).pipe(
@@ -57,28 +58,28 @@ export class AuthService {
   }
 
   private loadUser(): User | null {
-  const stored = localStorage.getItem('user');
-  if (!stored) return null;
-  const parsed = JSON.parse(stored);
-  return {
-    email: parsed.email ?? '',
-    role: parsed.role ?? 'EMPRUNTEUR',
-    nom: parsed.nom ?? '',
-    prenom: parsed.prenom ?? '',
-  };
-}
+    const stored = localStorage.getItem('user');
+    if (!stored) return null;
+    const parsed = JSON.parse(stored);
+    return {
+      email: parsed.email ?? '',
+      role: parsed.role ?? 'STAGIAIRE',
+      nom: parsed.nom ?? '',
+      prenom: parsed.prenom ?? '',
+    };
+  }
 
   private decodeUser(token: string): User {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       return {
         email: payload.sub,
-        role: payload.role?.replace('ROLE_', '') as 'GESTIONNAIRE' | 'EMPRUNTEUR',
+        role: payload.role as 'GESTIONNAIRE' | 'STAGIAIRE' | 'INTERVENANT',
         nom: payload.nom ?? '',
         prenom: payload.prenom ?? '',
       };
     } catch {
-      return { email: '', role: 'EMPRUNTEUR', nom: '', prenom: '' };
+      return { email: '', role: 'STAGIAIRE', nom: '', prenom: '' };
     }
   }
 }

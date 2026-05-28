@@ -131,9 +131,15 @@ export class DashboardComponent implements OnInit {
     }, 100);
   }
 
-  getInitiales(nom: string): string {
-    return nom.split(' ').map((p) => p[0]).join('').substring(0, 2).toUpperCase();
-  }
+  getInitiales(nom?: string | null): string {
+  if (!nom) return '?';
+
+  return nom
+    .split(' ')
+    .map(p => p[0])
+    .join('')
+    .toUpperCase();
+}
 
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });

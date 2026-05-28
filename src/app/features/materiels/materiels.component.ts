@@ -4,7 +4,7 @@ import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MaterielService, Materiel } from '../../core/services/materiel.service';
 import { AuthService } from '../../core/services/auth.service';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin } from 'rxjs';
 
 type MaterielStats = {
   categorie: string;
@@ -22,7 +22,7 @@ type GroupeMateriel = {
 @Component({
   selector: 'app-materiels',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule ],
   templateUrl: './materiels.component.html',
 })
 export class MaterielsComponent implements OnInit {
@@ -37,7 +37,6 @@ export class MaterielsComponent implements OnInit {
 
   isGestionnaire = this.auth.isGestionnaire;
 
-  // Modale
   modalOuverte = signal(false);
   categorieSelectionnee = signal<GroupeMateriel | null>(null);
   dateDebut = signal('');
@@ -55,14 +54,24 @@ export class MaterielsComponent implements OnInit {
     this.materielService.getAll().subscribe({
       next: (data: Materiel[]) => {
         this.materiels.set(data);
+
         const map = new Map<string, Materiel[]>();
+
         data.forEach((m) => {
-          if (!map.has(m.categorie)) map.set(m.categorie, []);
+          if (!map.has(m.categorie)) {
+            map.set(m.categorie, []);
+          }
+
           map.get(m.categorie)!.push(m);
         });
+
         this.materielsGroupes.set(
-          Array.from(map.entries()).map(([categorie, items]) => ({ categorie, items }))
+          Array.from(map.entries()).map(([categorie, items]) => ({
+            categorie,
+            items,
+          })),
         );
+
         this.materielsStats.set(this.groupStats(data));
         this.loading.set(false);
       },
@@ -70,8 +79,15 @@ export class MaterielsComponent implements OnInit {
     });
   }
 
+  goToCreateMateriel(): void {
+    this.router.navigate(['/materiels/gestion'], {
+      queryParams: { mode: 'create' },
+    });
+  }
+
   ouvrirModal(groupe: GroupeMateriel): void {
     if (this.isGestionnaire()) return;
+
     this.categorieSelectionnee.set(groupe);
     this.dateDebut.set('');
     this.dateFin.set('');
@@ -94,23 +110,27 @@ export class MaterielsComponent implements OnInit {
       this.erreurDates.set('Veuillez sélectionner une date de début et de fin.');
       return;
     }
+
     if (fin <= debut) {
       this.erreurDates.set('La date de fin doit être après la date de début.');
       return;
     }
+
     this.erreurDates.set('');
+
     if (!groupe) return;
 
     this.rechercheEnCours.set(true);
     this.rechercheEffectuee.set(false);
 
     const checks = groupe.items.map((m) =>
-      this.materielService.isDisponible(m.idMateriel, debut, fin)
+      this.materielService.isDisponible(m.idMateriel, debut, fin),
     );
 
     forkJoin(checks).subscribe({
       next: (results) => {
         const dispos = groupe.items.filter((_, i) => results[i]);
+
         this.resultatsDisponibles.set(dispos);
         this.rechercheEffectuee.set(true);
         this.rechercheEnCours.set(false);
@@ -124,6 +144,7 @@ export class MaterielsComponent implements OnInit {
 
   faireDemande(materiel: Materiel): void {
     this.fermerModal();
+
     this.router.navigate(['/emprunts'], {
       queryParams: {
         materielId: materiel.idMateriel,
@@ -134,31 +155,53 @@ export class MaterielsComponent implements OnInit {
   }
 
   private normalizeCategorie(cat: string): string {
-    return cat?.toLowerCase()?.normalize('NFD')?.replace(/[\u0300-\u036f]/g, '')?.replace(/\s+/g, ' ')?.trim();
+    return cat
+      ?.toLowerCase()
+      ?.normalize('NFD')
+      ?.replace(/[\u0300-\u036f]/g, '')
+      ?.replace(/\s+/g, ' ')
+      ?.trim();
   }
 
   private groupStats(data: Materiel[]): MaterielStats[] {
     const map = new Map<string, MaterielStats>();
+
     data.forEach((item) => {
       const key = this.normalizeCategorie(item.categorie);
-      if (!map.has(key)) map.set(key, { categorie: key, total: 0, disponible: 0, enCours: 0, enRetard: 0 });
+
+      if (!map.has(key)) {
+        map.set(key, {
+          categorie: key,
+          total: 0,
+          disponible: 0,
+          enCours: 0,
+          enRetard: 0,
+        });
+      }
+
       const group = map.get(key)!;
+
       group.total++;
+
       if (item.statut === 'DISPONIBLE') group.disponible++;
       else if (item.statut === 'EN_COURS') group.enCours++;
       else if (item.statut === 'EN_RETARD') group.enRetard++;
     });
+
     return Array.from(map.values());
   }
 
   getCategorieIcon(categorie: string): string {
     const cat = this.normalizeCategorie(categorie);
+
     const icons: Record<string, string> = {
-      'ecran': 'M3 4h18v12H3V4zm0 12h18M8 20h8M10 16v4M14 16v4',
-      'videoprojecteur': 'M3 6h18v10H3V6zm14 5a2 2 0 11-4 0 2 2 0 014 0z',
-      'casque vr': 'M2 7h20v10H2V7zm6 5a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z',
-      'pc': 'M4 3h16v12H4V3zM2 17h20M8 21h8',
+      ecran: 'M3 4h18v12H3V4zm0 12h18M8 20h8M10 16v4M14 16v4',
+      videoprojecteur: 'M3 6h18v10H3V6zm14 5a2 2 0 11-4 0 2 2 0 014 0z',
+      'casque vr':
+        'M2 7h20v10H2V7zm6 5a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z',
+      pc: 'M4 3h16v12H4V3zM2 17h20M8 21h8',
     };
+
     return icons[cat] ?? 'M12 4a8 8 0 100 16A8 8 0 0012 4z';
   }
 }

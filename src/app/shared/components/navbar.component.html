@@ -2,7 +2,7 @@
   class="fixed top-0 left-0 w-full z-50 h-16 flex items-center px-6"
   style="background: linear-gradient(90deg, #25176e, #2139d1)"
 >
-  <!-- GAUCHE : LOGO -->
+  <!-- LOGO -->
   <div class="flex items-center flex-1">
     <a routerLink="/dashboard" class="flex items-center gap-3">
       <div
@@ -24,11 +24,12 @@
           />
         </svg>
       </div>
-      <span class="text-white font-bold text-lg tracking-tight">LOCMNS</span>
+
+      <span class="text-white font-bold text-lg tracking-tight"> LOCMNS </span>
     </a>
   </div>
 
-  <!-- CENTRE : MENU DESKTOP -->
+  <!-- MENU DESKTOP -->
   <div class="hidden md:flex flex-1 justify-center items-center gap-1">
     <a
       routerLink="/dashboard"
@@ -37,6 +38,7 @@
     >
       Dashboard
     </a>
+
     <a
       routerLink="/materiels"
       routerLinkActive="bg-white/20"
@@ -44,14 +46,15 @@
     >
       Matériels
     </a>
+
     <a
       routerLink="/emprunts"
       routerLinkActive="bg-white/20"
-      [routerLinkActiveOptions]="{ exact: true }"
       class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
     >
       Emprunts
     </a>
+
     <a
       routerLink="/incidents"
       routerLinkActive="bg-white/20"
@@ -60,13 +63,14 @@
       Incidents
     </a>
 
-    <!-- Notifications avec pastille -->
+    <!-- Notifications -->
     <a
       routerLink="/notifications"
       routerLinkActive="bg-white/20"
       class="relative px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
     >
       Notifications
+
       <span
         *ngIf="nbNotifications() > 0"
         class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center animate-pulse"
@@ -76,7 +80,7 @@
       </span>
     </a>
 
-    <!-- Liens gestionnaire uniquement -->
+    <!-- GESTIONNAIRE -->
     @if (isGestionnaire()) {
       <a
         routerLink="/emprunts/calendrier"
@@ -85,6 +89,7 @@
       >
         Calendrier
       </a>
+
       <a
         routerLink="/utilisateurs"
         routerLinkActive="bg-white/20"
@@ -95,14 +100,16 @@
     }
   </div>
 
-  <!-- DROITE : ACTIONS -->
+  <!-- ACTIONS -->
   <div class="flex flex-1 justify-end items-center gap-3">
-    <!-- BURGER MOBILE -->
+    <!-- MOBILE -->
     <button class="md:hidden text-white text-2xl" (click)="toggleMenu()">☰</button>
 
     <!-- USER -->
     <div class="text-right hidden sm:block">
-      <p class="text-white text-sm font-medium">{{ user()?.email }}</p>
+      <p class="text-white text-sm font-medium">
+        {{ user()?.email }}
+      </p>
     </div>
 
     <!-- THEME -->
@@ -138,6 +145,7 @@
     >
       Dashboard
     </a>
+
     <a
       routerLink="/materiels"
       (click)="menuOpen = false"
@@ -145,6 +153,7 @@
     >
       Matériels
     </a>
+
     <a
       routerLink="/emprunts"
       (click)="menuOpen = false"
@@ -152,6 +161,7 @@
     >
       Emprunts
     </a>
+
     <a
       routerLink="/incidents"
       (click)="menuOpen = false"
@@ -160,23 +170,14 @@
       Incidents
     </a>
 
-    <!-- Notifications avec pastille mobile -->
     <a
       routerLink="/notifications"
       (click)="menuOpen = false"
-      class="relative px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all flex items-center gap-2"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
     >
       Notifications
-      <span
-        *ngIf="nbNotifications() > 0"
-        class="min-w-[18px] h-[18px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center"
-        style="background-color: #ef4444"
-      >
-        {{ nbNotifications() > 99 ? '99+' : nbNotifications() }}
-      </span>
     </a>
 
-    <!-- Liens gestionnaire uniquement (mobile) -->
     @if (isGestionnaire()) {
       <a
         routerLink="/emprunts/calendrier"
@@ -185,6 +186,7 @@
       >
         Calendrier
       </a>
+
       <a
         routerLink="/utilisateurs"
         (click)="menuOpen = false"
