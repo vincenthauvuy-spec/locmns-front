@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
+import { ApiClientService } from '../../core/api/api-client.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,12 +17,14 @@ export class NavbarComponent implements OnInit {
   private notificationService = inject(NotificationService);
   private theme = inject(ThemeService);
   private router = inject(Router);
+  private api = inject(ApiClientService);
 
   user = computed(() => this.auth.user());
   isGestionnaire = computed(() => this.auth.isGestionnaire());
   isDark = this.theme.isDark;
 
   menuOpen = false;
+  exportMenuOpen = false;
   nbNotifications = signal(0);
 
   constructor() {
@@ -37,6 +40,22 @@ export class NavbarComponent implements OnInit {
   chargerNotifications(): void {
     this.notificationService.getAll().subscribe({
       next: (data) => this.nbNotifications.set(data.length),
+      error: () => {},
+    });
+  }
+
+  exportXml(type: 'emprunts' | 'materiels' | 'incidents'): void {
+    this.exportMenuOpen = false;
+    this.menuOpen = false;
+    this.api.getBlob(`/export/${type}/xml`).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${type}.xml`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
       error: () => {},
     });
   }

@@ -160,15 +160,12 @@
                       [class]="getEtatClass(materiel.etat)">
                   {{ materiel.etat }}
                 </span>
-                @if (materiel.estLouable) {
-                  <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    Disponible
-                  </span>
-                } @else {
-                  <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                    Indisponible
-                  </span>
-                }
+                <span
+                  class="px-2 py-0.5 rounded-full text-xs font-medium"
+                  [class]="materiel.estLouable ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                >
+                  {{ materiel.estLouable ? 'Empruntable' : 'Non empruntable' }}
+                </span>
               </div>
               <p class="text-xs text-base-content/50">
                 {{ materiel.modele }} · {{ materiel.localisation }} · N° {{ materiel.numeroSerie }}

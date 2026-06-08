@@ -29,6 +29,10 @@ export class ApiClientService {
     return this.http.delete<T>(this.buildUrl(path));
   }
 
+  getBlob(path: string) {
+    return this.http.get(this.buildUrl(path), { responseType: 'blob' });
+  }
+
   withQuery(path: string, query: Record<string, QueryValue>): string {
     const params = new URLSearchParams();
 

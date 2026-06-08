@@ -9,15 +9,14 @@
         {{ emprunts().length }} emprunt{{ emprunts().length > 1 ? 's' : '' }} au total
       </p>
     </div>
-    @if (!isGestionnaire()) {
-      <button
-        (click)="showForm.set(!showForm())"
-        class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
-        style="background-color: #25176e"
-      >
-        {{ showForm() ? 'Annuler' : '+ Nouvelle demande' }}
-      </button>
-    }
+
+    <button
+      (click)="showForm.set(!showForm())"
+      class="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+      style="background-color: #25176e"
+    >
+      {{ showForm() ? 'Annuler' : '+ Nouvelle demande' }}
+    </button>
   </div>
 
   <!-- Message succès -->
@@ -38,6 +37,7 @@
   @if (showForm()) {
     <div class="rounded-2xl p-6 border border-base-300 bg-base-100">
       <h2 class="text-lg font-semibold text-base-content mb-4">Nouvelle demande d'emprunt</h2>
+
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-base-content/60 mb-1">Matériel</label>
@@ -62,9 +62,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-base-content/60 mb-1"
-              >Date de fin prévue</label
-            >
+            <label class="block text-sm font-medium text-base-content/60 mb-1">Date de fin prévue</label>
             <input
               type="date"
               formControlName="dateFinPrevue"
@@ -77,13 +75,9 @@
         @if (checkingDispo()) {
           <p class="text-xs text-base-content/50">Vérification de la disponibilité...</p>
         } @else if (disponibilite() === true) {
-          <p class="text-xs font-medium" style="color: #22c55e">
-            ✓ Matériel disponible sur cette période
-          </p>
+          <p class="text-xs font-medium" style="color: #22c55e">✓ Matériel disponible sur cette période</p>
         } @else if (disponibilite() === false) {
-          <p class="text-xs font-medium" style="color: #ef4444">
-            ✗ Matériel non disponible sur cette période
-          </p>
+          <p class="text-xs font-medium" style="color: #ef4444">✗ Matériel non disponible sur cette période</p>
         }
 
         <button
@@ -130,7 +124,7 @@
       Chargement...
     </div>
 
-    <!-- Liste vide -->
+  <!-- Liste vide -->
   } @else if (empruntsFiltres.length === 0) {
     <div class="rounded-xl p-8 text-center bg-base-200">
       <p class="text-base-content/60 font-medium">Aucun emprunt dans cette catégorie.</p>
@@ -141,7 +135,7 @@
       }
     </div>
 
-    <!-- Liste des emprunts -->
+  <!-- Liste des emprunts -->
   } @else {
     <div class="space-y-3">
       @for (emprunt of empruntsFiltres; track emprunt.idEmprunt) {
@@ -150,67 +144,167 @@
           [style.opacity]="emprunt.statut === 'RENDU' || emprunt.statut === 'REFUSE' ? '0.65' : '1'"
         >
           <div class="flex items-center justify-between gap-4">
+
+            <!-- Infos emprunt -->
             <div class="flex-1 space-y-1">
               <p class="font-semibold text-base-content">{{ emprunt.materiel }}</p>
               @if (isGestionnaire()) {
                 <p class="text-xs text-base-content/60">{{ emprunt.emprunteur }}</p>
               }
               <p class="text-xs text-base-content/50">
-                Du {{ emprunt.dateDebut | date: 'dd/MM/yyyy' }} au
-                {{ emprunt.dateFinPrevue | date: 'dd/MM/yyyy' }}
+                Du {{ emprunt.dateDebut | date: 'dd/MM/yyyy' }}
+                au {{ emprunt.dateFinPrevue | date: 'dd/MM/yyyy' }}
                 @if (emprunt.dateFinReelle) {
                   · Rendu le {{ emprunt.dateFinReelle | date: 'dd/MM/yyyy' }}
                 }
               </p>
+              @if (emprunt.compteurProlongations && emprunt.compteurProlongations > 0) {
+                <p class="text-xs text-base-content/40">
+                  {{ emprunt.compteurProlongations }} prolongation{{ emprunt.compteurProlongations > 1 ? 's' : '' }}
+                </p>
+              }
             </div>
-            <div class="flex flex-col items-end gap-2">
-              <div class="flex flex-col items-end gap-2">
-                <span
-                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                  [class]="getStatutClass(emprunt.statut)"
-                >
-                  <span
-                    class="w-1.5 h-1.5 rounded-full"
-                    [style.background]="getStatutDot(emprunt.statut)"
-                  ></span>
-                  {{ getStatutLabel(emprunt.statut) }}
-                </span>
 
-                @if (isGestionnaire() && emprunt.statut === 'EN_ATTENTE') {
+            <!-- Actions -->
+            <div class="flex flex-col items-end gap-2">
+
+              <!-- Badge statut -->
+              <span
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                [class]="getStatutClass(emprunt.statut)"
+              >
+                <span class="w-1.5 h-1.5 rounded-full" [style.background]="getStatutDot(emprunt.statut)"></span>
+                {{ getStatutLabel(emprunt.statut) }}
+              </span>
+
+              <!-- Gestionnaire : valider/refuser demande initiale -->
+              @if (isGestionnaire() && emprunt.statut === 'EN_ATTENTE') {
+                <div class="flex gap-2">
+                  <button
+                    (click)="valider(emprunt.idEmprunt, true)"
+                    class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
+                    style="background-color: #22c55e"
+                  >Valider</button>
+                  <button
+                    (click)="valider(emprunt.idEmprunt, false)"
+                    class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
+                    style="background-color: #ef4444"
+                  >Refuser</button>
+                </div>
+              }
+
+              <!-- Gestionnaire : valider/refuser prolongation -->
+              @if (isGestionnaire() && emprunt.demandeProlongation) {
+                <div class="flex flex-col items-end gap-1">
+                  <span class="text-xs text-amber-600 font-medium">
+                    Prolongation demandée jusqu'au {{ emprunt.dateFinDemandee | date: 'dd/MM/yyyy' }}
+                  </span>
                   <div class="flex gap-2">
                     <button
-                      (click)="valider(emprunt.idEmprunt, true)"
+                      (click)="validerProlongation(emprunt.idEmprunt, true)"
                       class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                       style="background-color: #22c55e"
-                    >
-                      Valider
-                    </button>
-
+                    >Accepter</button>
                     <button
-                      (click)="valider(emprunt.idEmprunt, false)"
+                      (click)="validerProlongation(emprunt.idEmprunt, false)"
                       class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                       style="background-color: #ef4444"
-                    >
-                      Refuser
-                    </button>
+                    >Refuser</button>
                   </div>
-                }
+                </div>
+              }
 
-                @if (!isGestionnaire() && peutAnnuler(emprunt)) {
+              <!-- Gestionnaire : retour anticipé -->
+              @if (isGestionnaire() && emprunt.statut === 'EN_COURS') {
+                <button
+                  (click)="retourAnticipe(emprunt.idEmprunt)"
+                  [disabled]="retourAnticipeEnCours() === emprunt.idEmprunt"
+                  class="text-xs px-3 py-1 rounded-lg border transition-all"
+                  style="color: #6366f1; border-color: #c7d2fe; background: #eef2ff"
+                >
+                  @if (retourAnticipeEnCours() === emprunt.idEmprunt) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    Retour anticipé
+                  }
+                </button>
+              }
+
+              <!-- Emprunteur : annuler -->
+              @if (!isGestionnaire() && peutAnnuler(emprunt)) {
+                <button
+                  (click)="annuler(emprunt.idEmprunt)"
+                  [disabled]="annulationEnCours() === emprunt.idEmprunt"
+                  class="text-xs px-3 py-1 rounded-lg border transition-all"
+                  style="color: #ef4444; border-color: #fecaca; background: #fef2f2"
+                >
+                  @if (annulationEnCours() === emprunt.idEmprunt) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    Annuler
+                  }
+                </button>
+              }
+
+              <!-- Emprunteur : demander prolongation -->
+              @if (emprunt.statut === 'EN_COURS' && !emprunt.demandeProlongation) {
+                @if (showProlongationForm() === emprunt.idEmprunt) {
+                  <div class="flex flex-col gap-1 items-end">
+                    <input
+                      type="date"
+                      [value]="dateFinDemandee()"
+                      (change)="dateFinDemandee.set($any($event.target).value)"
+                      class="text-xs px-2 py-1 rounded-lg border border-base-300 bg-base-200"
+                    />
+                    <div class="flex gap-2">
+                      <button
+                        (click)="demanderProlongation(emprunt.idEmprunt)"
+                        [disabled]="prolongationEnCours() === emprunt.idEmprunt || !dateFinDemandee()"
+                        class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
+                        style="background-color: #25176e"
+                      >
+                        @if (prolongationEnCours() === emprunt.idEmprunt) {
+                          <span class="loading loading-spinner loading-xs"></span>
+                        } @else {
+                          Confirmer
+                        }
+                      </button>
+                      <button
+                        (click)="showProlongationForm.set(null)"
+                        class="text-xs px-3 py-1 rounded-lg border border-base-300"
+                      >Annuler</button>
+                    </div>
+                  </div>
+                } @else {
                   <button
-                    (click)="annuler(emprunt.idEmprunt)"
-                    [disabled]="annulationEnCours() === emprunt.idEmprunt"
+                    (click)="showProlongationForm.set(emprunt.idEmprunt)"
                     class="text-xs px-3 py-1 rounded-lg border transition-all"
-                    style="color: #ef4444; border-color: #fecaca; background: #fef2f2"
-                  >
-                    @if (annulationEnCours() === emprunt.idEmprunt) {
-                      <span class="loading loading-spinner loading-xs"></span>
-                    } @else {
-                      Annuler
-                    }
-                  </button>
+                    style="color: #25176e; border-color: #c7d2fe; background: #eef2ff"
+                  >Prolonger</button>
                 }
-              </div>
+              }
+
+              <!-- Emprunteur : prolongation en attente -->
+              @if (emprunt.demandeProlongation && !isGestionnaire()) {
+                <span class="text-xs text-amber-600 font-medium">Prolongation en attente</span>
+              }
+
+              <!-- Emprunteur : retour anticipé -->
+              @if (!isGestionnaire() && emprunt.statut === 'EN_COURS') {
+                <button
+                  (click)="retourAnticipe(emprunt.idEmprunt)"
+                  [disabled]="retourAnticipeEnCours() === emprunt.idEmprunt"
+                  class="text-xs px-3 py-1 rounded-lg border transition-all"
+                  style="color: #059669; border-color: #a7f3d0; background: #ecfdf5"
+                >
+                  @if (retourAnticipeEnCours() === emprunt.idEmprunt) {
+                    <span class="loading loading-spinner loading-xs"></span>
+                  } @else {
+                    Retour anticipé
+                  }
+                </button>
+              }
+
             </div>
           </div>
         </div>

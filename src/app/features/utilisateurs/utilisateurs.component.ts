@@ -50,7 +50,7 @@ export class UtilisateursComponent implements OnInit {
   chargerUtilisateurs(): void {
     this.loading.set(true);
     this.utilisateurService.getAll().subscribe({
-      next: (data) => { this.utilisateurs.set(data); this.loading.set(false); },
+      next: (data) => { this.utilisateurs.set([...data].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'))); this.loading.set(false); },
       error: () => { this.erreur.set('Impossible de charger les utilisateurs.'); this.loading.set(false); },
     });
   }

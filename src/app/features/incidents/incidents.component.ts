@@ -87,7 +87,10 @@ export class IncidentsComponent implements OnInit {
     // Gestionnaire voit tous les incidents, emprunteur ne signale que
     this.incidentService.getAll().subscribe({
       next: (data) => {
-        this.incidents.set(data);
+        const sorted = [...data].sort(
+          (a, b) => new Date(b.dateSignalement).getTime() - new Date(a.dateSignalement).getTime(),
+        );
+        this.incidents.set(sorted);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

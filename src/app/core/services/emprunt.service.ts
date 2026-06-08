@@ -13,13 +13,12 @@ export interface Emprunt {
   dateDebut: string;
   dateFinPrevue: string;
   dateFinReelle?: string;
+  dateFinDemandee?: string;
+  demandeProlongation?: boolean;
+  validationProlongation?: boolean | null;
+  compteurProlongations?: number;
 
-  statut:
-    | 'EN_ATTENTE'
-    | 'REFUSE'
-    | 'EN_COURS'
-    | 'EN_RETARD'
-    | 'RENDU';
+  statut: 'EN_ATTENTE' | 'REFUSE' | 'EN_COURS' | 'EN_RETARD' | 'RENDU';
 
   materiel: string;
   emprunteur: string;
@@ -43,7 +42,6 @@ export interface DemandeEmprunt {
 
 @Injectable({ providedIn: 'root' })
 export class EmpruntService {
-
   private readonly api = inject(ApiClientService);
 
   /**
@@ -51,12 +49,9 @@ export class EmpruntService {
    * vers le format frontend normalisé.
    */
   private normalizeEmprunt(emprunt: ApiEmprunt): Emprunt {
-
     return {
       ...emprunt,
-      statut: normalizeEmpruntStatus(
-        emprunt.statut
-      ) as Emprunt['statut'],
+      statut: normalizeEmpruntStatus(emprunt.statut) as Emprunt['statut'],
     };
   }
 
@@ -64,14 +59,9 @@ export class EmpruntService {
    * Récupère tous les emprunts.
    */
   getAll() {
-
     return this.api
       .get<ApiEmprunt[]>('/emprunts')
-      .pipe(
-        map((items) =>
-          items.map((item) => this.normalizeEmprunt(item))
-        )
-      );
+      .pipe(map((items) => items.map((item) => this.normalizeEmprunt(item))));
   }
 
   /**
@@ -79,14 +69,9 @@ export class EmpruntService {
    * de l'utilisateur connecté.
    */
   getMesEmprunts() {
-
     return this.api
       .get<ApiEmprunt[]>('/emprunts/mes-emprunts')
-      .pipe(
-        map((items) =>
-          items.map((item) => this.normalizeEmprunt(item))
-        )
-      );
+      .pipe(map((items) => items.map((item) => this.normalizeEmprunt(item))));
   }
 
   /**
@@ -94,26 +79,18 @@ export class EmpruntService {
    * encore en attente.
    */
   getEnAttente() {
-
     return this.api
       .get<ApiEmprunt[]>('/emprunts/en-attente')
-      .pipe(
-        map((items) =>
-          items.map((item) => this.normalizeEmprunt(item))
-        )
-      );
+      .pipe(map((items) => items.map((item) => this.normalizeEmprunt(item))));
   }
 
   /**
    * Création d'une demande d'emprunt.
    */
   demandeEmprunt(demande: DemandeEmprunt) {
-
     return this.api
       .post<ApiEmprunt>('/emprunts/demande', demande)
-      .pipe(
-        map((item) => this.normalizeEmprunt(item))
-      );
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
 
   /**
@@ -121,33 +98,18 @@ export class EmpruntService {
    * d'une demande d'emprunt.
    */
   valider(id: number, decision: boolean) {
-
     return this.api
-      .put<ApiEmprunt>(
-        this.api.withQuery(
-          `/emprunts/${id}/valider`,
-          { decision }
-        ),
-        {}
-      )
-      .pipe(
-        map((item) => this.normalizeEmprunt(item))
-      );
+      .put<ApiEmprunt>(this.api.withQuery(`/emprunts/${id}/valider`, { decision }), {})
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
 
   /**
    * Annule une demande en attente.
    */
   annuler(id: number) {
-
     return this.api
-      .patch<ApiEmprunt>(
-        `/emprunts/${id}/annuler`,
-        {}
-      )
-      .pipe(
-        map((item) => this.normalizeEmprunt(item))
-      );
+      .patch<ApiEmprunt>(`/emprunts/${id}/annuler`, {})
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
 
   /**
@@ -157,14 +119,32 @@ export class EmpruntService {
    * en renseignant la date de retour réelle.
    */
   retour(id: number) {
+    return this.api
+      .patch<ApiEmprunt>(`/emprunts/${id}/retour`, {})
+      .pipe(map((item) => this.normalizeEmprunt(item)));
+  }
 
+  demanderProlongation(id: number, dateFinDemandee: string) {
     return this.api
       .patch<ApiEmprunt>(
-        `/emprunts/${id}/retour`,
-        {}
+        this.api.withQuery(`/emprunts/${id}/prolongation`, { dateFinDemandee }),
+        {},
       )
-      .pipe(
-        map((item) => this.normalizeEmprunt(item))
-      );
+      .pipe(map((item) => this.normalizeEmprunt(item)));
+  }
+
+  validerProlongation(id: number, decision: boolean) {
+    return this.api
+      .patch<ApiEmprunt>(
+        this.api.withQuery(`/emprunts/${id}/prolongation/valider`, { decision }),
+        {},
+      )
+      .pipe(map((item) => this.normalizeEmprunt(item)));
+  }
+
+  retourAnticipe(id: number) {
+    return this.api
+      .patch<ApiEmprunt>(`/emprunts/${id}/retour-anticipe`, {})
+      .pipe(map((item) => this.normalizeEmprunt(item)));
   }
 }

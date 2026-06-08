@@ -22,7 +22,7 @@ type GroupeMateriel = {
 @Component({
   selector: 'app-materiels',
   standalone: true,
-  imports: [CommonModule, FormsModule ],
+  imports: [CommonModule, FormsModule],
   templateUrl: './materiels.component.html',
 })
 export class MaterielsComponent implements OnInit {
@@ -36,6 +36,20 @@ export class MaterielsComponent implements OnInit {
   loading = signal(true);
 
   isGestionnaire = this.auth.isGestionnaire;
+
+  categoriesOuvertes = new Set<string>();
+
+  toggleCategorie(cat: string): void {
+    if (this.categoriesOuvertes.has(cat)) {
+      this.categoriesOuvertes.delete(cat);
+    } else {
+      this.categoriesOuvertes.add(cat);
+    }
+  }
+
+  isCategorieOuverte(cat: string): boolean {
+    return this.categoriesOuvertes.has(cat);
+  }
 
   modalOuverte = signal(false);
   categorieSelectionnee = signal<GroupeMateriel | null>(null);
@@ -197,8 +211,7 @@ export class MaterielsComponent implements OnInit {
     const icons: Record<string, string> = {
       ecran: 'M3 4h18v12H3V4zm0 12h18M8 20h8M10 16v4M14 16v4',
       videoprojecteur: 'M3 6h18v10H3V6zm14 5a2 2 0 11-4 0 2 2 0 014 0z',
-      'casque vr':
-        'M2 7h20v10H2V7zm6 5a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z',
+      'casque vr': 'M2 7h20v10H2V7zm6 5a2 2 0 11-4 0 2 2 0 014 0zm8 0a2 2 0 11-4 0 2 2 0 014 0z',
       pc: 'M4 3h16v12H4V3zM2 17h20M8 21h8',
     };
 

@@ -12,6 +12,8 @@ import { AuthService } from '../../core/services/auth.service';
 
 import { NotificationService } from '../../core/services/notification.service';
 
+import { debounceTime } from 'rxjs/operators';
+
 type StatutFilter = 'TOUS' | 'EN_ATTENTE' | 'EN_COURS' | 'TERMINE';
 
 @Component({
@@ -37,6 +39,11 @@ export class EmpruntsComponent implements OnInit {
   submitting = signal(false);
 
   annulationEnCours = signal<number | null>(null);
+
+  prolongationEnCours = signal<number | null>(null);
+  retourAnticipeEnCours = signal<number | null>(null);
+  showProlongationForm = signal<number | null>(null);
+  dateFinDemandee = signal<string>('');
 
   successMessage = signal('');
   errorMessage = signal('');
@@ -89,9 +96,8 @@ export class EmpruntsComponent implements OnInit {
       }
     });
 
-    this.form.valueChanges.subscribe(() => {
+    this.form.valueChanges.pipe(debounceTime(300)).subscribe(() => {
       const { idMateriel, dateDebut, dateFinPrevue } = this.form.value;
-
       if (idMateriel && dateDebut && dateFinPrevue) {
         this.checkDisponibilite();
       } else {
@@ -122,7 +128,10 @@ export class EmpruntsComponent implements OnInit {
 
     req.subscribe({
       next: (data) => {
-        this.emprunts.set(data);
+        const sorted = [...data].sort(
+          (a, b) => new Date(b.dateDebut).getTime() - new Date(a.dateDebut).getTime(),
+        );
+        this.emprunts.set(sorted);
         this.loading.set(false);
       },
 
@@ -328,5 +337,60 @@ export class EmpruntsComponent implements OnInit {
       default:
         return '#9CA3AF';
     }
+  }
+
+  demanderProlongation(id: number): void {
+    if (!this.dateFinDemandee()) return;
+
+    this.prolongationEnCours.set(id);
+
+    this.empruntService.demanderProlongation(id, this.dateFinDemandee()).subscribe({
+      next: () => {
+        this.prolongationEnCours.set(null);
+        this.showProlongationForm.set(null);
+        this.dateFinDemandee.set('');
+        this.successMessage.set('Demande de prolongation envoyée.');
+        this.loadEmprunts();
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: (err) => {
+        this.prolongationEnCours.set(null);
+        this.errorMessage.set(err?.error || 'Erreur lors de la demande de prolongation.');
+        setTimeout(() => this.errorMessage.set(''), 5000);
+      },
+    });
+  }
+
+  validerProlongation(id: number, decision: boolean): void {
+    this.empruntService.validerProlongation(id, decision).subscribe({
+      next: () => {
+        this.successMessage.set(decision ? 'Prolongation acceptée.' : 'Prolongation refusée.');
+        this.loadEmprunts();
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: () => {
+        this.errorMessage.set('Erreur lors du traitement.');
+        setTimeout(() => this.errorMessage.set(''), 3000);
+      },
+    });
+  }
+
+  retourAnticipe(id: number): void {
+    this.retourAnticipeEnCours.set(id);
+
+    this.empruntService.retourAnticipe(id).subscribe({
+      next: () => {
+        this.retourAnticipeEnCours.set(null);
+        this.successMessage.set('Retour anticipé enregistré.');
+        this.loadEmprunts();
+        this.notificationService.triggerRefresh();
+        setTimeout(() => this.successMessage.set(''), 3000);
+      },
+      error: () => {
+        this.retourAnticipeEnCours.set(null);
+        this.errorMessage.set('Erreur lors du retour anticipé.');
+        setTimeout(() => this.errorMessage.set(''), 3000);
+      },
+    });
   }
 }

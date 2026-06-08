@@ -20,9 +20,10 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
         // Token expiré → déconnexion automatique
         auth.logout();
       }
-      if (error.status === 403) {
-        router.navigate(['/dashboard']);
-      }
+      // if (error.status === 403) {
+      //   router.navigate(['/dashboard']);
+      // }
+      // 403 géré par chaque composant
       return throwError(() => error);
     })
   );
