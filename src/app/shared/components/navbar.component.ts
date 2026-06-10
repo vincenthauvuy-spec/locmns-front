@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, OnInit } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnInit, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -42,6 +42,14 @@ export class NavbarComponent implements OnInit {
       next: (data) => this.nbNotifications.set(data.length),
       error: () => {},
     });
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.export-dropdown')) {
+      this.exportMenuOpen = false;
+    }
   }
 
   exportXml(type: 'emprunts' | 'materiels' | 'incidents'): void {
