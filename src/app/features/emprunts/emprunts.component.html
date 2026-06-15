@@ -62,7 +62,9 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-base-content/60 mb-1">Date de fin prévue</label>
+            <label class="block text-sm font-medium text-base-content/60 mb-1"
+              >Date de fin prévue</label
+            >
             <input
               type="date"
               formControlName="dateFinPrevue"
@@ -75,9 +77,13 @@
         @if (checkingDispo()) {
           <p class="text-xs text-base-content/50">Vérification de la disponibilité...</p>
         } @else if (disponibilite() === true) {
-          <p class="text-xs font-medium" style="color: #22c55e">✓ Matériel disponible sur cette période</p>
+          <p class="text-xs font-medium" style="color: #22c55e">
+            ✓ Matériel disponible sur cette période
+          </p>
         } @else if (disponibilite() === false) {
-          <p class="text-xs font-medium" style="color: #ef4444">✗ Matériel non disponible sur cette période</p>
+          <p class="text-xs font-medium" style="color: #ef4444">
+            ✗ Matériel non disponible sur cette période
+          </p>
         }
 
         <button
@@ -124,7 +130,7 @@
       Chargement...
     </div>
 
-  <!-- Liste vide -->
+    <!-- Liste vide -->
   } @else if (empruntsFiltres.length === 0) {
     <div class="rounded-xl p-8 text-center bg-base-200">
       <p class="text-base-content/60 font-medium">Aucun emprunt dans cette catégorie.</p>
@@ -135,7 +141,7 @@
       }
     </div>
 
-  <!-- Liste des emprunts -->
+    <!-- Liste des emprunts -->
   } @else {
     <div class="space-y-3">
       @for (emprunt of empruntsFiltres; track emprunt.idEmprunt) {
@@ -144,7 +150,6 @@
           [style.opacity]="emprunt.statut === 'RENDU' || emprunt.statut === 'REFUSE' ? '0.65' : '1'"
         >
           <div class="flex items-center justify-between gap-4">
-
             <!-- Infos emprunt -->
             <div class="flex-1 space-y-1">
               <p class="font-semibold text-base-content">{{ emprunt.materiel }}</p>
@@ -152,28 +157,32 @@
                 <p class="text-xs text-base-content/60">{{ emprunt.emprunteur }}</p>
               }
               <p class="text-xs text-base-content/50">
-                Du {{ emprunt.dateDebut | date: 'dd/MM/yyyy' }}
-                au {{ emprunt.dateFinPrevue | date: 'dd/MM/yyyy' }}
+                Du {{ emprunt.dateDebut | date: 'dd/MM/yyyy' }} au
+                {{ emprunt.dateFinPrevue | date: 'dd/MM/yyyy' }}
                 @if (emprunt.dateFinReelle) {
                   · Rendu le {{ emprunt.dateFinReelle | date: 'dd/MM/yyyy' }}
                 }
               </p>
               @if (emprunt.compteurProlongations && emprunt.compteurProlongations > 0) {
                 <p class="text-xs text-base-content/40">
-                  {{ emprunt.compteurProlongations }} prolongation{{ emprunt.compteurProlongations > 1 ? 's' : '' }}
+                  {{ emprunt.compteurProlongations }} prolongation{{
+                    emprunt.compteurProlongations > 1 ? 's' : ''
+                  }}
                 </p>
               }
             </div>
 
             <!-- Actions -->
             <div class="flex flex-col items-end gap-2">
-
               <!-- Badge statut -->
               <span
                 class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
                 [class]="getStatutClass(emprunt.statut)"
               >
-                <span class="w-1.5 h-1.5 rounded-full" [style.background]="getStatutDot(emprunt.statut)"></span>
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  [style.background]="getStatutDot(emprunt.statut)"
+                ></span>
                 {{ getStatutLabel(emprunt.statut) }}
               </span>
 
@@ -184,12 +193,16 @@
                     (click)="valider(emprunt.idEmprunt, true)"
                     class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                     style="background-color: #22c55e"
-                  >Valider</button>
+                  >
+                    Valider
+                  </button>
                   <button
                     (click)="valider(emprunt.idEmprunt, false)"
                     class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                     style="background-color: #ef4444"
-                  >Refuser</button>
+                  >
+                    Refuser
+                  </button>
                 </div>
               }
 
@@ -197,25 +210,32 @@
               @if (isGestionnaire() && emprunt.demandeProlongation) {
                 <div class="flex flex-col items-end gap-1">
                   <span class="text-xs text-amber-600 font-medium">
-                    Prolongation demandée jusqu'au {{ emprunt.dateFinDemandee | date: 'dd/MM/yyyy' }}
+                    Prolongation demandée jusqu'au
+                    {{ emprunt.dateFinDemandee | date: 'dd/MM/yyyy' }}
                   </span>
                   <div class="flex gap-2">
                     <button
                       (click)="validerProlongation(emprunt.idEmprunt, true)"
                       class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                       style="background-color: #22c55e"
-                    >Accepter</button>
+                    >
+                      Accepter
+                    </button>
                     <button
                       (click)="validerProlongation(emprunt.idEmprunt, false)"
                       class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                       style="background-color: #ef4444"
-                    >Refuser</button>
+                    >
+                      Refuser
+                    </button>
                   </div>
                 </div>
               }
 
               <!-- Gestionnaire : retour anticipé -->
-              @if (isGestionnaire() && emprunt.statut === 'EN_COURS') {
+              @if (
+                isGestionnaire() && emprunt.statut === 'EN_COURS' && !emprunt.demandeRetourAnticipe
+              ) {
                 <button
                   (click)="retourAnticipe(emprunt.idEmprunt)"
                   [disabled]="retourAnticipeEnCours() === emprunt.idEmprunt"
@@ -259,7 +279,9 @@
                     <div class="flex gap-2">
                       <button
                         (click)="demanderProlongation(emprunt.idEmprunt)"
-                        [disabled]="prolongationEnCours() === emprunt.idEmprunt || !dateFinDemandee()"
+                        [disabled]="
+                          prolongationEnCours() === emprunt.idEmprunt || !dateFinDemandee()
+                        "
                         class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
                         style="background-color: #25176e"
                       >
@@ -272,7 +294,9 @@
                       <button
                         (click)="showProlongationForm.set(null)"
                         class="text-xs px-3 py-1 rounded-lg border border-base-300"
-                      >Annuler</button>
+                      >
+                        Annuler
+                      </button>
                     </div>
                   </div>
                 } @else {
@@ -280,7 +304,9 @@
                     (click)="showProlongationForm.set(emprunt.idEmprunt)"
                     class="text-xs px-3 py-1 rounded-lg border transition-all"
                     style="color: #25176e; border-color: #c7d2fe; background: #eef2ff"
-                  >Prolonger</button>
+                  >
+                    Prolonger
+                  </button>
                 }
               }
 
@@ -290,7 +316,9 @@
               }
 
               <!-- Emprunteur : retour anticipé -->
-              @if (!isGestionnaire() && emprunt.statut === 'EN_COURS') {
+              @if (
+                !isGestionnaire() && emprunt.statut === 'EN_COURS' && !emprunt.demandeRetourAnticipe
+              ) {
                 <button
                   (click)="retourAnticipe(emprunt.idEmprunt)"
                   [disabled]="retourAnticipeEnCours() === emprunt.idEmprunt"
@@ -305,6 +333,12 @@
                 </button>
               }
 
+              <!-- Retour anticipé en attente -->
+              @if (emprunt.demandeRetourAnticipe && emprunt.statut === 'EN_COURS') {
+                <span class="text-xs font-medium" style="color: #6366f1"
+                  >Retour anticipé demandé</span
+                >
+              }
             </div>
           </div>
         </div>

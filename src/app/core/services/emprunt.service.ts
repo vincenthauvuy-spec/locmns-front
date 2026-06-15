@@ -17,6 +17,7 @@ export interface Emprunt {
   demandeProlongation?: boolean;
   validationProlongation?: boolean | null;
   compteurProlongations?: number;
+  demandeRetourAnticipe?: boolean;
 
   statut: 'EN_ATTENTE' | 'REFUSE' | 'EN_COURS' | 'EN_RETARD' | 'RENDU';
 
