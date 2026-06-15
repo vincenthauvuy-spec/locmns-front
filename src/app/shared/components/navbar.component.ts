@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ApiClientService } from '../../core/api/api-client.service';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-navbar',
@@ -18,6 +19,7 @@ export class NavbarComponent implements OnInit {
   private theme = inject(ThemeService);
   private router = inject(Router);
   private api = inject(ApiClientService);
+  private cdr = inject(ChangeDetectorRef);
 
   user = computed(() => this.auth.user());
   isGestionnaire = computed(() => this.auth.isGestionnaire());
@@ -39,7 +41,10 @@ export class NavbarComponent implements OnInit {
 
   chargerNotifications(): void {
     this.notificationService.getAll().subscribe({
-      next: (data) => this.nbNotifications.set(data.length),
+      next: (data) => {
+        this.nbNotifications.set(data.length);
+        this.cdr.detectChanges();
+      },
       error: () => {},
     });
   }
