@@ -232,21 +232,29 @@
                 </div>
               }
 
-              <!-- Gestionnaire : retour anticipé -->
+              <!-- Gestionnaire : confirmer retour anticipé -->
               @if (
-                isGestionnaire() && emprunt.statut === 'EN_COURS' && !emprunt.demandeRetourAnticipe
+                isGestionnaire() && emprunt.demandeRetourAnticipe && emprunt.statut === 'EN_COURS'
               ) {
                 <button
-                  (click)="retourAnticipe(emprunt.idEmprunt)"
-                  [disabled]="retourAnticipeEnCours() === emprunt.idEmprunt"
+                  (click)="confirmerRetour(emprunt.idEmprunt)"
+                  class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
+                  style="background-color: #6366f1"
+                >
+                  Confirmer le retour
+                </button>
+              }
+
+              <!-- Gestionnaire : confirmer retour anticipé -->
+              @if (
+                isGestionnaire() && emprunt.demandeRetourAnticipe && emprunt.statut === 'EN_COURS'
+              ) {
+                <button
+                  (click)="confirmerRetour(emprunt.idEmprunt)"
                   class="text-xs px-3 py-1 rounded-lg border transition-all"
                   style="color: #6366f1; border-color: #c7d2fe; background: #eef2ff"
                 >
-                  @if (retourAnticipeEnCours() === emprunt.idEmprunt) {
-                    <span class="loading loading-spinner loading-xs"></span>
-                  } @else {
-                    Retour anticipé
-                  }
+                  Confirmer le retour
                 </button>
               }
 
