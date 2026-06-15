@@ -390,21 +390,6 @@ export class EmpruntsComponent implements OnInit {
     });
   }
 
-  confirmerRetour(id: number): void {
-    this.empruntService.retour(id).subscribe({
-      next: () => {
-        this.successMessage.set('Retour confirmé.');
-        this.loadEmprunts();
-        this.notificationService.triggerRefresh();
-        setTimeout(() => this.successMessage.set(''), 3000);
-      },
-      error: () => {
-        this.errorMessage.set('Erreur lors de la confirmation du retour.');
-        setTimeout(() => this.errorMessage.set(''), 3000);
-      },
-    });
-  }
-
   retourAnticipe(id: number): void {
     this.retourAnticipeEnCours.set(id);
 

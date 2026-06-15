@@ -47,14 +47,6 @@ export const routes: Routes = [
       },
       // Historique / gestion des emprunts — gestionnaire uniquement
       {
-        path: 'emprunts/validation',
-        canActivate: [roleGuard('GESTIONNAIRE')],
-        loadComponent: () =>
-          import('./features/emprunts/validation-emprunts/validation-emprunts.component').then(
-            (m) => m.ValidationEmpruntsComponent,
-          ),
-      },
-      {
         path: 'incidents',
         loadComponent: () =>
           import('./features/incidents/incidents.component').then((m) => m.IncidentsComponent),

@@ -1,18 +1,9 @@
-import {
-  Component,
-  OnInit,
-  signal,
-  inject,
-  effect,
-} from '@angular/core';
+import { Component, OnInit, signal, inject, effect } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
-import {
-  NotificationService,
-  NotificationDTO,
-} from '../../core/services/notification.service';
+import { NotificationService, NotificationDTO } from '../../core/services/notification.service';
 
 @Component({
   selector: 'app-notifications',
@@ -21,7 +12,6 @@ import {
   templateUrl: './notifications.component.html',
 })
 export class NotificationsComponent implements OnInit {
-
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
@@ -30,18 +20,18 @@ export class NotificationsComponent implements OnInit {
   erreur = signal('');
 
   constructor() {
-
     /**
      * Recharge automatiquement
      * les notifications lorsqu'une action
      * déclenche triggerRefresh().
      */
-    effect(() => {
-
-      this.notificationService.refresh();
-
-      this.loadNotifications();
-    });
+    effect(
+      () => {
+        this.notificationService.refresh();
+        this.loadNotifications();
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   ngOnInit(): void {
@@ -52,23 +42,17 @@ export class NotificationsComponent implements OnInit {
    * Charge les notifications.
    */
   loadNotifications(): void {
-
     this.loading.set(true);
 
     this.notificationService.getAll().subscribe({
-
       next: (data) => {
-
         this.notifications.set(data);
 
         this.loading.set(false);
       },
 
       error: () => {
-
-        this.erreur.set(
-          'Impossible de charger les notifications.'
-        );
+        this.erreur.set('Impossible de charger les notifications.');
 
         this.loading.set(false);
       },
@@ -80,18 +64,16 @@ export class NotificationsComponent implements OnInit {
    * selon le contenu de la notification.
    */
   ouvrirNotification(notification: NotificationDTO): void {
-
     const message = notification.message.toLowerCase();
 
     /**
      * Demande d'emprunt à valider.
      */
     if (
-      message.includes('emprunt')
-      || message.includes('validation')
-      || message.includes('demande')
+      message.includes('emprunt') ||
+      message.includes('validation') ||
+      message.includes('demande')
     ) {
-
       this.router.navigate(['/emprunts']);
 
       return;
@@ -100,10 +82,7 @@ export class NotificationsComponent implements OnInit {
     /**
      * Incident matériel.
      */
-    if (
-      message.includes('incident')
-    ) {
-
+    if (message.includes('incident')) {
       this.router.navigate(['/incidents']);
 
       return;
@@ -120,9 +99,7 @@ export class NotificationsComponent implements OnInit {
     color: string;
     label: string;
   } {
-
     switch (type) {
-
       case 'ALERTE':
         return {
           bg: '#FEE2E2',
@@ -147,9 +124,7 @@ export class NotificationsComponent implements OnInit {
   }
 
   getIcone(type: string): string {
-
     switch (type) {
-
       case 'ALERTE':
         return '⚠️';
 

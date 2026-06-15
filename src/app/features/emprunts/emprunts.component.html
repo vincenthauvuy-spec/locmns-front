@@ -245,16 +245,14 @@
                 </button>
               }
 
-              <!-- Gestionnaire : confirmer retour anticipé -->
-              @if (
-                isGestionnaire() && emprunt.demandeRetourAnticipe && emprunt.statut === 'EN_COURS'
-              ) {
+              <!-- Gestionnaire : forcer retour (EN_RETARD) -->
+              @if (isGestionnaire() && emprunt.statut === 'EN_RETARD') {
                 <button
                   (click)="confirmerRetour(emprunt.idEmprunt)"
-                  class="text-xs px-3 py-1 rounded-lg border transition-all"
-                  style="color: #6366f1; border-color: #c7d2fe; background: #eef2ff"
+                  class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
+                  style="background-color: #ef4444"
                 >
-                  Confirmer le retour
+                  Forcer le retour
                 </button>
               }
 
@@ -341,8 +339,10 @@
                 </button>
               }
 
-              <!-- Retour anticipé en attente -->
-              @if (emprunt.demandeRetourAnticipe && emprunt.statut === 'EN_COURS') {
+              <!-- Retour anticipé en attente (emprunteur uniquement) -->
+              @if (
+                emprunt.demandeRetourAnticipe && emprunt.statut === 'EN_COURS' && !isGestionnaire()
+              ) {
                 <span class="text-xs font-medium" style="color: #6366f1"
                   >Retour anticipé demandé</span
                 >

@@ -30,11 +30,13 @@ export class NavbarComponent implements OnInit {
   nbNotifications = signal(0);
 
   constructor() {
-    effect(() => {
-      this.notificationService.refresh();
-
-      this.chargerNotifications();
-    });
+    effect(
+      () => {
+        this.notificationService.refresh();
+        this.chargerNotifications();
+      },
+      { allowSignalWrites: true },
+    );
   }
 
   ngOnInit(): void {}
