@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal, OnInit, HostListener } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnInit, HostListener, untracked } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -31,8 +31,8 @@ export class NavbarComponent implements OnInit {
 
   constructor() {
     effect(() => {
-      this.notificationService.refresh();
-      this.chargerNotifications();
+      const _ = this.notificationService.refresh();
+      untracked(() => this.chargerNotifications());
     }, { allowSignalWrites: true });
   }
 
