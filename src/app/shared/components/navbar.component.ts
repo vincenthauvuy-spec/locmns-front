@@ -30,25 +30,27 @@ export class NavbarComponent implements OnInit {
   nbNotifications = signal(0);
 
   constructor() {
-    effect(
-      () => {
-        this.notificationService.refresh();
-        this.chargerNotifications();
-      },
-      { allowSignalWrites: true },
-    );
+    effect(() => {
+      this.notificationService.refresh();
+      this.chargerNotifications();
+    }, { allowSignalWrites: true });
   }
 
   ngOnInit(): void {}
 
+  private refreshTimeout: ReturnType<typeof setTimeout> | null = null;
+
   chargerNotifications(): void {
-    this.notificationService.getAll().subscribe({
-      next: (data) => {
-        this.nbNotifications.set(data.length);
-        this.cdr.detectChanges();
-      },
-      error: () => {},
-    });
+    if (this.refreshTimeout) clearTimeout(this.refreshTimeout);
+    this.refreshTimeout = setTimeout(() => {
+      this.notificationService.getAll().subscribe({
+        next: (data) => {
+          this.nbNotifications.set(data.length);
+          this.cdr.detectChanges();
+        },
+        error: () => {},
+      });
+    }, 150);
   }
 
   @HostListener('document:click', ['$event'])
