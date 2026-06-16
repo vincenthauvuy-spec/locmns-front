@@ -1,4 +1,14 @@
-import { Component, computed, effect, inject, signal, OnInit, HostListener, untracked } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  untracked,
+} from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -6,6 +16,8 @@ import { ThemeService } from '../../core/services/theme.service';
 import { NotificationService } from '../../core/services/notification.service';
 import { ApiClientService } from '../../core/api/api-client.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { Subscription, interval } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -13,7 +25,7 @@ import { ChangeDetectorRef } from '@angular/core';
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.component.html',
 })
-export class NavbarComponent implements OnInit {
+export class NavbarComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private notificationService = inject(NotificationService);
   private theme = inject(ThemeService);
@@ -29,14 +41,31 @@ export class NavbarComponent implements OnInit {
   exportMenuOpen = false;
   nbNotifications = signal(0);
 
+  private pollSub: Subscription | null = null;
+
   constructor() {
-    effect(() => {
-      const _ = this.notificationService.refresh();
-      untracked(() => this.chargerNotifications());
-    }, { allowSignalWrites: true });
+    effect(
+      () => {
+        const _ = this.notificationService.refresh();
+        untracked(() => this.chargerNotifications());
+      },
+      { allowSignalWrites: true },
+    );
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.chargerNotifications();
+    this.pollSub = interval(30000)
+      .pipe(switchMap(() => this.notificationService.getAll()))
+      .subscribe({
+        next: (data) => this.nbNotifications.set(data.length),
+        error: () => {},
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.pollSub?.unsubscribe();
+  }
 
   private refreshTimeout: ReturnType<typeof setTimeout> | null = null;
 
