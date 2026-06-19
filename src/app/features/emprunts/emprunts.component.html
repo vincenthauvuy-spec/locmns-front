@@ -47,7 +47,9 @@
           >
             <option value="">Sélectionner un matériel</option>
             @for (m of materiels(); track m.idMateriel) {
-              <option [value]="m.idMateriel">{{ m.nom }} — {{ m.categorie }}</option>
+              <option [value]="m.idMateriel">
+                {{ m.nom }} — {{ m.categorie }}@if (m.dureeMaxJours) { (max {{ m.dureeMaxJours }} j)}
+              </option>
             }
           </select>
         </div>
@@ -72,6 +74,17 @@
             />
           </div>
         </div>
+
+        <!-- Durée max de la catégorie -->
+        @if (form.value.idMateriel) {
+          @for (m of materiels(); track m.idMateriel) {
+            @if (m.idMateriel === +form.value.idMateriel && m.dureeMaxJours) {
+              <p class="text-xs text-base-content/50">
+                ℹ Durée maximale pour cette catégorie : <strong>{{ m.dureeMaxJours }} jours</strong>
+              </p>
+            }
+          }
+        }
 
         <!-- Indicateur disponibilité -->
         @if (checkingDispo()) {
