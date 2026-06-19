@@ -195,7 +195,8 @@ export class EmpruntsComponent implements OnInit {
       error: (err) => {
         this.submitting.set(false);
 
-        this.errorMessage.set(err?.error || 'Erreur lors de la demande. Réessayez.');
+        const msg = err?.error?.message ?? err?.error ?? 'Erreur lors de la demande. Réessayez.';
+        this.errorMessage.set(typeof msg === 'string' ? msg : 'Erreur lors de la demande. Réessayez.');
 
         setTimeout(() => this.errorMessage.set(''), 5000);
       },
@@ -355,7 +356,8 @@ export class EmpruntsComponent implements OnInit {
       },
       error: (err) => {
         this.prolongationEnCours.set(null);
-        this.errorMessage.set(err?.error || 'Erreur lors de la demande de prolongation.');
+        const msg = err?.error?.message ?? err?.error ?? 'Erreur lors de la demande de prolongation.';
+        this.errorMessage.set(typeof msg === 'string' ? msg : 'Erreur lors de la demande de prolongation.');
         setTimeout(() => this.errorMessage.set(''), 5000);
       },
     });
