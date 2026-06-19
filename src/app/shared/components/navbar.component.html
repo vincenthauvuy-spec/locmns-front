@@ -1,9 +1,9 @@
 <nav
-  class="fixed top-0 left-0 w-full z-50 h-16 flex items-center px-6"
+  class="fixed top-0 left-0 w-full z-50 h-16 flex items-center px-4 lg:px-6"
   style="background: linear-gradient(90deg, #25176e, #2139d1)"
 >
   <!-- LOGO -->
-  <div class="flex items-center flex-1">
+  <div class="flex items-center flex-shrink-0">
     <a routerLink="/dashboard" class="flex items-center gap-3">
       <div
         class="w-8 h-8 rounded-lg flex items-center justify-center"
@@ -30,11 +30,11 @@
   </div>
 
   <!-- MENU DESKTOP -->
-  <div class="hidden md:flex flex-1 justify-center items-center gap-1">
+  <div class="hidden lg:flex flex-1 justify-center items-center gap-1 flex-wrap min-w-0">
     <a
       routerLink="/dashboard"
       routerLinkActive="bg-white/20"
-      class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
     >
       Dashboard
     </a>
@@ -42,7 +42,7 @@
     <a
       routerLink="/materiels"
       routerLinkActive="bg-white/20"
-      class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
     >
       Matériels
     </a>
@@ -51,7 +51,7 @@
       routerLink="/emprunts"
       routerLinkActive="bg-white/20"
       [routerLinkActiveOptions]="{ exact: true }"
-      class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
     >
       Emprunts
     </a>
@@ -59,7 +59,7 @@
     <a
       routerLink="/incidents"
       routerLinkActive="bg-white/20"
-      class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
     >
       Incidents
     </a>
@@ -68,7 +68,7 @@
     <a
       routerLink="/notifications"
       routerLinkActive="bg-white/20"
-      class="relative px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+      class="relative px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
     >
       Notifications
 
@@ -86,7 +86,7 @@
       <a
         routerLink="/emprunts/calendrier"
         routerLinkActive="bg-white/20"
-        class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+        class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
       >
         Calendrier
       </a>
@@ -94,7 +94,7 @@
       <a
         routerLink="/utilisateurs"
         routerLinkActive="bg-white/20"
-        class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all"
+        class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all whitespace-nowrap"
       >
         Utilisateurs
       </a>
@@ -103,7 +103,7 @@
       <div class="relative export-dropdown">
         <button
           (click)="exportMenuOpen = !exportMenuOpen"
-          class="px-4 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all flex items-center gap-1"
+          class="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 text-sm transition-all flex items-center gap-1 whitespace-nowrap"
         >
           Export XML
           <svg
@@ -147,13 +147,13 @@
   </div>
 
   <!-- ACTIONS -->
-  <div class="flex flex-1 justify-end items-center gap-3">
+  <div class="flex flex-shrink-0 justify-end items-center gap-2 lg:gap-3 ml-auto">
     <!-- MOBILE -->
-    <button class="md:hidden text-white text-2xl" (click)="toggleMenu()">☰</button>
+    <button class="lg:hidden text-white text-2xl" (click)="toggleMenu()">☰</button>
 
     <!-- USER -->
     <div class="text-right hidden sm:block">
-      <p class="text-white text-sm font-medium">
+      <p class="text-white text-sm font-medium truncate max-w-[160px]">
         {{ user()?.email }}
       </p>
     </div>
@@ -182,7 +182,7 @@
   <!-- MENU MOBILE -->
   <div
     *ngIf="menuOpen"
-    class="absolute top-16 left-0 w-full bg-[#2139d1] flex flex-col gap-1 p-4 md:hidden"
+    class="absolute top-16 left-0 w-full bg-[#2139d1] flex flex-col gap-1 p-4 lg:hidden"
   >
     <a
       routerLink="/dashboard"
