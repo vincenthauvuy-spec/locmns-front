@@ -48,7 +48,10 @@
             <option value="">Sélectionner un matériel</option>
             @for (m of materiels(); track m.idMateriel) {
               <option [value]="m.idMateriel">
-                {{ m.nom }} — {{ m.categorie }}@if (m.dureeMaxJours) { (max {{ m.dureeMaxJours }} j)}
+                {{ m.nom }} — {{ m.categorie }}
+                @if (m.dureeMaxJours) {
+                  (max {{ m.dureeMaxJours }} j)
+                }
               </option>
             }
           </select>
@@ -258,8 +261,12 @@
                 </button>
               }
 
-              <!-- Gestionnaire : forcer retour (EN_RETARD) -->
-              @if (isGestionnaire() && emprunt.statut === 'EN_RETARD') {
+              <!-- Gestionnaire : forcer retour (EN_COURS ou EN_RETARD) -->
+              @if (
+                isGestionnaire() &&
+                (emprunt.statut === 'EN_COURS' || emprunt.statut === 'EN_RETARD') &&
+                !emprunt.demandeRetourAnticipe
+              ) {
                 <button
                   (click)="confirmerRetour(emprunt.idEmprunt)"
                   class="text-xs px-3 py-1 rounded-lg text-white transition-all hover:opacity-90"
