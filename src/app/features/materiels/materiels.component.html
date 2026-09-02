@@ -165,14 +165,22 @@
                   ? '#dcfce7'
                   : materiel.statut === 'EN_RETARD'
                     ? '#fee2e2'
-                    : '#dbeafe'
+                    : materiel.statut === 'EN_REPARATION'
+                      ? '#fef9c3'
+                      : materiel.statut === 'HORS_SERVICE'
+                        ? '#e5e7eb'
+                        : '#dbeafe'
               "
               [style.color]="
                 materiel.statut === 'DISPONIBLE'
                   ? '#166534'
                   : materiel.statut === 'EN_RETARD'
                     ? '#991b1b'
-                    : '#1e40af'
+                    : materiel.statut === 'EN_REPARATION'
+                      ? '#854d0e'
+                      : materiel.statut === 'HORS_SERVICE'
+                        ? '#374151'
+                        : '#1e40af'
               "
             >
               {{
@@ -180,7 +188,11 @@
                   ? 'Disponible'
                   : materiel.statut === 'EN_RETARD'
                     ? 'En retard'
-                    : 'En cours'
+                    : materiel.statut === 'EN_REPARATION'
+                      ? 'En réparation'
+                      : materiel.statut === 'HORS_SERVICE'
+                        ? 'Hors service'
+                        : 'En cours'
               }}
             </span>
           </div>

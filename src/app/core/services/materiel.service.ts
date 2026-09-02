@@ -12,7 +12,7 @@ export interface Materiel {
   etat: string;
   categorie: string;
   dureeMaxJours?: number;
-  statut?: 'DISPONIBLE' | 'EN_COURS' | 'EN_RETARD';
+  statut?: 'DISPONIBLE' | 'EN_COURS' | 'EN_RETARD' | 'EN_REPARATION' | 'HORS_SERVICE';
 }
 
 export interface Categorie {
